@@ -1,0 +1,2287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Journaling & Goal Tracker</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Favicon -->
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/e/ea/Google_Gemini_logo.svg" type="image/svg+xml">
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter for modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Marked.js CDN for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Lucide Icons for a modern, futuristic feel -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide-dynamic@latest/dist/lucide.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* --- Custom Styles (Adapted from your inspiration code) --- */
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Prevent body scrollbar, main-container handles it */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.6s ease, color 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        :root {
+            /* Default Theme (Light Mode) */
+            --bg-color-light: #f3f4f6;
+            --card-bg-light: #ffffff;
+            --text-color-light: #1f2937;
+            --border-color-light: #e5e7eb;
+            --user-msg-bg-light: #e0f2fe;
+            --user-msg-text-light: #1e40af;
+            --ai-msg-bg-light: #f3f4f6;
+            --ai-msg-text-light: #374151;
+            --chat-input-bg-light: #ffffff;
+            --chat-input-border-light: #d1d5db;
+            --chat-input-text-light: #1f2937;
+            --input-btn-bg-light: #e5e7eb;
+            --input-btn-text-light: #4b5563;
+            --header-bg-light: #f9fafb;
+            --accent-primary: #6366f1; /* Indigo-500 */
+            --accent-primary-dark: #818cf8; /* Indigo-400 for dark mode */
+            --accent-secondary: #22d3ee; /* Cyan-400 */
+            --accent-secondary-dark: #67e8f9; /* Cyan-300 for dark mode */
+            --accent-error: #ef4444;
+            --accent-success: #22c55e;
+
+            /* Default Theme (Dark Mode) */
+            --bg-color-dark: #0a0a0f; 
+            --card-bg-dark: #13131a; 
+            --text-color-dark: #e5e7eb; 
+            --border-color-dark: #2d3748;
+            --user-msg-bg-dark: #1a237e; 
+            --user-msg-text-dark: #e0e7ff; 
+            --ai-msg-bg-dark: #2d3748; 
+            --ai-msg-text-dark: #f9fafb; 
+            --chat-input-bg-dark: #1f2937;
+            --chat-input-border-dark: #374151;
+            --chat-input-text-dark: #e5e7eb;
+            --input-btn-bg-dark: #374151;
+            --input-btn-text-dark: #d1d5db;
+            --header-bg-dark: #1f2937;
+        }
+        
+        body.light {
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+        }
+        body.dark {
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-dark);
+        }
+
+        /* THEME DEFINITIONS - Copied directly from your inspiration */
+        body.theme-badass-black { --accent-primary: #ef4444; --accent-primary-dark: #f87171; --accent-secondary: #eab308; --accent-secondary-dark: #facc15; --accent-error: #dc2626; --accent-success: #16a34a; }
+        body.theme-badass-black.light { --bg-color-light: #171717; --card-bg-light: #262626; --text-color-light: #f5f5f5; --border-color-light: #404040; --user-msg-bg-light: #440000; --user-msg-text-light: #fca5a5; --ai-msg-bg-light: #333333; --ai-msg-text-light: #e5e5e5; --chat-input-bg-light: #262626; --chat-input-border-light: #404040; --chat-input-text-light: #f5f5f5; --input-btn-bg-light: #404040; --input-btn-text-light: #d4d4d8; --header-bg-light: #171717; }
+        body.theme-badass-black.dark { --bg-color-dark: #0a0a0a; --card-bg-dark: #1c1c1c; --text-color-dark: #e5e5e5; --border-color-dark: #333333; --user-msg-bg-dark: #800000; --user-msg-text-dark: #fecaca; --ai-msg-bg-dark: #222222; --ai-msg-text-dark: #f5f5f5; --chat-input-bg-dark: #1c1c1c; --chat-input-border-dark: #333333; --chat-input-text-dark: #e5e5e5; --input-btn-bg-dark: #333333; --input-btn-text-dark: #d4d4d8; --header-bg-dark: #0a0a0a; }
+
+        body.theme-golden-glory { --accent-primary: #d97706; --accent-primary-dark: #fcd34d; --accent-secondary: #fcd34d; --accent-secondary-dark: #fbbf24; --accent-error: #ef4444; --accent-success: #22c55e; }
+        body.theme-golden-glory.light { --bg-color-light: #fef3c7; --card-bg-light: #ffffff; --text-color-light: #451a03; --border-color-light: #fcd34d; --user-msg-bg-light: #fde68a; --user-msg-text-light: #78350f; --ai-msg-bg-light: #fffbeb; --ai-msg-text-light: #451a03; --chat-input-bg-light: #ffffff; --chat-input-border-light: #fcd34d; --chat-input-text-light: #451a03; --input-btn-bg-light: #fcd34d; --input-btn-text-light: #78350f; --header-bg-light: #fef9c3; }
+        body.theme-golden-glory.dark { --bg-color-dark: #1e1b07; --card-bg-dark: #2e2609; --text-color-dark: #fef3c7; --border-color-dark: #92400e; --user-msg-bg-dark: #78350f; --user-msg-text-dark: #fde68a; --ai-msg-bg-dark: #3e310a; --ai-msg-text-dark: #fcd34d; --chat-input-bg-dark: #2e2609; --chat-input-border-dark: #92400e; --chat-input-text-dark: #fef3c7; --input-btn-bg-dark: #92400e; --input-btn-text-dark: #fde68a; --header-bg-dark: #1e1b07; }
+
+        body.theme-minimal-criminal { --accent-primary: #737373; --accent-primary-dark: #a3a3a3; --accent-secondary: #a3a3a3; --accent-secondary-dark: #d4d4d4; --accent-error: #ef4444; --accent-success: #22c55e; }
+        body.theme-minimal-criminal.light { --bg-color-light: #f8f8f8; --card-bg-light: #ffffff; --text-color-light: #333333; --border-color-light: #e0e0e0; --user-msg-bg-light: #e6e6e6; --user-msg-text-light: #4d4d4d; --ai-msg-bg-light: #f0f0f0; --ai-msg-text-light: #333333; --chat-input-bg-light: #ffffff; --chat-input-border-light: #e0e0e0; --chat-input-text-light: #333333; --input-btn-bg-light: #e0e0e0; --input-btn-text-light: #4d4d4d; --header-bg-light: #f5f5f5; }
+        body.theme-minimal-criminal.dark { --bg-color-dark: #1a1a1a; --card-bg-dark: #2a2a2a; --text-color-dark: #e0e0e0; --border-color-dark: #4a4a4a; --user-msg-bg-dark: #3a3a3a; --user-msg-text-dark: #d4d4d4; --ai-msg-bg-dark: #2f2f2f; --ai-msg-text-dark: #e0e0e0; --chat-input-bg-dark: #2a2a2a; --chat-input-border-dark: #4a4a4a; --chat-input-text-dark: #e0e0e0; --input-btn-bg-dark: #4a4a4a; --input-btn-text-dark: #d4d4d4; --header-bg-dark: #1a1a1a; }
+
+        body.theme-la-futura { --accent-primary: #6d28d9; --accent-primary-dark: #a78bfa; --accent-secondary: #0ea5e9; --accent-secondary-dark: #38bdf8; --accent-error: #ef4444; --accent-success: #22c55e; }
+        body.theme-la-futura.light { --bg-color-light: #e0f2fe; --card-bg-light: #ffffff; --text-color-light: #1e3a8a; --border-color-light: #93c5fd; --user-msg-bg-light: #c7d2fe; --user-msg-text-light: #312e81; --ai-msg-bg-light: #eff6ff; --ai-msg-text-light: #1e3a8a; --chat-input-bg-light: #ffffff; --chat-input-border-light: #93c5fd; --chat-input-text-light: #1e3a8a; --input-btn-bg-light: #dbeafe; --input-btn-text-light: #3b82f6; --header-bg-light: #bfdbfe; }
+        body.theme-la-futura.dark { --bg-color-dark: #0f172a; --card-bg-dark: #1e293b; --text-color-dark: #e2e8f0; --border-color-dark: #334155; --user-msg-bg-dark: #4c1d95; --user-msg-text-dark: #e0e7ff; --ai-msg-bg-dark: #1a2230; --ai-msg-text-dark: #a78bfa; --chat-input-bg-dark: #1e293b; --chat-input-border-dark: #334155; --chat-input-text-dark: #e2e8f0; --input-btn-bg-dark: #334155; --input-btn-text-dark: #94a3b8; --header-bg-dark: #0f172a; }
+
+        body.theme-gods-plan { --accent-primary: #10b981; --accent-primary-dark: #34d399; --accent-secondary: #3b82f6; --accent-secondary-dark: #60a5fa; --accent-error: #ef4444; --accent-success: #22c55e; }
+        body.theme-gods-plan.light { --bg-color-light: #ecfdf5; --card-bg-light: #ffffff; --text-color-light: #064e3b; --border-color-light: #a7f3d0; --user-msg-bg-light: #d1fae5; --user-msg-text-light: #047857; --ai-msg-bg-light: #f0fdf4; --ai-msg-text-light: #064e3b; --chat-input-bg-light: #ffffff; --chat-input-border-light: #a7f3d0; --chat-input-text-light: #064e3b; --input-btn-bg-light: #d1fae5; --input-btn-text-light: #047857; --header-bg-light: #d1fae5; }
+        body.theme-gods-plan.dark { --bg-color-dark: #062e24; --card-bg-dark: #0a3d34; --text-color-dark: #d1fae5; --border-color-dark: #0f5d47; --user-msg-bg-dark: #059669; --user-msg-text-dark: #d1fae5; --ai-msg-bg-dark: #0a3d34; --ai-msg-text-dark: #a7f3d0; --chat-input-bg-dark: #0a3d34; --chat-input-border-dark: #0f5d47; --chat-input-text-dark: #d1fae5; --input-btn-bg-dark: #0f5d47; --input-btn-text-dark: #a7f3d0; --header-bg-dark: #062e24; }
+
+        body.theme-the-ecstacy { --accent-primary: #a855f7; --accent-primary-dark: #c084fc; --accent-secondary: #f472b6; --accent-secondary-dark: #f87171; --accent-error: #ef4444; --accent-success: #22c55e; }
+        body.theme-the-ecstacy.light { --bg-color-light: #f3e8ff; --card-bg-light: #ffffff; --text-color-light: #581c87; --border-color-light: #d8b4fe; --user-msg-bg-light: #e9d5ff; --user-msg-text-light: #7e22ce; --ai-msg-bg-light: #faf5ff; --ai-msg-text-light: #581c87; --chat-input-bg-light: #ffffff; --chat-input-border-light: #d8b4fe; --chat-input-text-light: #581c87; --input-btn-bg-light: #e9d5ff; --input-btn-text-light: #a855f7; --header-bg-light: #f3e8ff; }
+        body.theme-the-ecstacy.dark { --bg-color-dark: #170d2b; --card-bg-dark: #2a1c43; --text-color-dark: #f3e8ff; --border-color-dark: #4c1d95; --user-msg-bg-dark: #6b21a8; --user-msg-text-dark: #f3e8ff; --ai-msg-bg-dark: #2a1c43; --ai-msg-text-dark: #d8b4fe; --chat-input-bg-dark: #2a1c43; --chat-input-border-dark: #4c1d95; --chat-input-text-dark: #f3e8ff; --input-btn-bg-dark: #4c1d95; --input-btn-text-dark: #e9d5ff; --header-bg-dark: #170d2b; }
+
+        .header-section { background-color: var(--header-bg-light); border-color: var(--border-color-light); }
+        body.dark .header-section { background-color: var(--header-bg-dark); border-color: var(--border-color-dark); }
+        .header-section h1 { color: var(--text-color-light); }
+        body.dark .header-section h1 { color: var(--text-color-dark); }
+        .header-section .text-gray-500 { color: #6b7280; }
+        body.dark .header-section .text-gray-500 { color: #9ca3af; }
+
+        #theme-selector-btn, #new-chat-btn, #version-selector-btn, #switch-user-btn { background-color: var(--input-btn-bg-light); color: var(--input-btn-text-light); }
+        #theme-selector-btn:hover, #new-chat-btn:hover, #version-selector-btn:hover, #switch-user-btn:hover { background-color: color-mix(in srgb, var(--input-btn-bg-light) 80%, black 10%); }
+        body.dark #theme-selector-btn, body.dark #new-chat-btn, body.dark #version-selector-btn, body.dark #switch-user-btn { background-color: var(--input-btn-bg-dark); color: var(--input-btn-text-dark); }
+        body.dark #theme-selector-btn:hover, body.dark #new-chat-btn:hover, body.dark #version-selector-btn:hover, body.dark #switch-user-btn:hover { background-color: color-mix(in srgb, var(--input-btn-bg-dark) 80%, white 10%); }
+
+        /* Main app container */
+        #main-app-container {
+            flex-grow: 1;
+            display: flex;
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+            transition: background-color 0.6s ease, color 0.6s ease;
+            position: relative;
+            overflow: hidden; /* For floating chatbot and main content scroll */
+        }
+        body.dark #main-app-container {
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-dark);
+        }
+
+        /* Navigation */
+        #main-nav {
+            flex-shrink: 0;
+            width: 200px;
+            padding: 1rem;
+            border-right: 1px solid var(--border-color-light);
+            background-color: var(--card-bg-light);
+            transition: background-color 0.6s ease, border-color 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        body.dark #main-nav {
+            border-color: var(--border-color-dark);
+            background-color: var(--card-bg-dark);
+        }
+        #main-nav button {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            color: var(--text-color-light);
+            background-color: transparent;
+            border: none;
+        }
+        body.dark #main-nav button { color: var(--text-color-dark); }
+        #main-nav button:hover { background-color: var(--bg-color-light); }
+        body.dark #main-nav button:hover { background-color: color-mix(in srgb, var(--card-bg-dark) 80%, white 5%); }
+        #main-nav button.active {
+            background-color: var(--accent-primary);
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        body.dark #main-nav button.active {
+            background-color: var(--accent-primary-dark);
+            color: white;
+        }
+        #main-nav button.active .lucide { color: white !important; }
+
+        /* Main content area */
+        #content-area {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        /* Card styles for various entries */
+        .data-card {
+            background-color: var(--card-bg-light);
+            border: 1px solid var(--border-color-light);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        body.dark .data-card {
+            background-color: var(--card-bg-dark);
+            border-color: var(--border-color-dark);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .data-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        body.dark .data-card:hover { box-shadow: 0 6px 12px rgba(0,0,0,0.3); }
+
+        .data-card .card-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+        }
+        .data-card .card-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .data-card .card-actions button .lucide {
+            color: var(--input-btn-text-light);
+            width: 1rem;
+            height: 1rem;
+        }
+        body.dark .data-card .card-actions button .lucide { color: var(--input-btn-text-dark); }
+        .data-card .card-actions button:hover { background-color: var(--bg-color-light); }
+        body.dark .data-card .card-actions button:hover { background-color: color-mix(in srgb, var(--card-bg-dark) 80%, white 5%); }
+        .data-card .card-actions button:hover .lucide { color: var(--accent-primary); }
+        body.dark .data-card .card-actions button:hover .lucide { color: var(--accent-primary-dark); }
+
+        /* Journal specific styles (Book/Diary-like) */
+        .journal-entry {
+            page-break-inside: avoid; /* Keep entries on one "page" if possible */
+            padding-bottom: 2.5rem; /* Space for action buttons on hover */
+        }
+        .journal-date { color: var(--accent-primary); font-size: 0.9em; margin-bottom: 0.5rem; }
+        body.dark .journal-date { color: var(--accent-primary-dark); }
+        .journal-mood { font-size: 0.9em; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem; color: var(--input-btn-text-light); }
+        body.dark .journal-mood { color: var(--input-btn-text-dark); }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--bg-color-light);
+            border-radius: 9999px;
+            height: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color-light);
+        }
+        body.dark .progress-bar-container {
+            background-color: var(--input-btn-bg-dark);
+            border-color: var(--border-color-dark);
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--accent-primary);
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        body.dark .progress-bar-fill {
+            background-color: var(--accent-primary-dark);
+        }
+        .goal-status { font-size: 0.9em; color: var(--input-btn-text-light); margin-top: 0.5rem; }
+        body.dark .goal-status { color: var(--input-btn-text-dark); }
+
+        /* To-Do and Notes specific styles */
+        .todo-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color-light); }
+        body.dark .todo-item { border-color: var(--border-color-dark); }
+        .todo-item:last-child { border-bottom: none; }
+        .todo-item input[type="checkbox"] { transform: scale(1.2); cursor: pointer; accent-color: var(--accent-primary); }
+        .todo-item.completed span { text-decoration: line-through; color: var(--input-btn-text-light); }
+        body.dark .todo-item.completed span { color: var(--input-btn-text-dark); }
+        .todo-priority { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.5rem; margin-left: auto; }
+        .priority-high { background-color: #fecaca; color: #dc2626; } /* Red-100, Red-600 */
+        body.dark .priority-high { background-color: #450a0a; color: #fca5a5; } /* Red-950, Red-300 */
+        .priority-medium { background-color: #fef08a; color: #d97706; } /* Yellow-100, Amber-600 */
+        body.dark .priority-medium { background-color: #422006; color: #fcd34d; } /* Amber-950, Amber-300 */
+        .priority-low { background-color: #dcfce7; color: #16a34a; } /* Green-100, Green-600 */
+        body.dark .priority-low { background-color: #052e16; color: #86efac; } /* Green-950, Green-300 */
+
+        /* Floating Chatbot button */
+        #floating-chatbot-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background-color: var(--accent-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+        #floating-chatbot-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.25);
+        }
+        body.dark #floating-chatbot-btn {
+            background-color: var(--accent-primary-dark);
+        }
+
+        /* Floating Chatbot Container */
+        #floating-chatbot-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: min(90vw, 400px);
+            height: min(80vh, 600px);
+            border-radius: 1.5rem;
+            background-color: var(--card-bg-light);
+            border: 1px solid var(--border-color-light);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(0.95); /* Initial scale for animation */
+            opacity: 0;
+            pointer-events: none; /* Hidden by default */
+            transition: all 0.3s ease;
+        }
+        #floating-chatbot-container.open {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: all;
+        }
+        body.dark #floating-chatbot-container {
+            background-color: var(--card-bg-dark);
+            border-color: var(--border-color-dark);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        /* Chatbot Header (inside floating container) */
+        #chatbot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color-light);
+            background-color: var(--header-bg-light);
+            flex-shrink: 0;
+        }
+        body.dark #chatbot-header {
+            border-color: var(--border-color-dark);
+            background-color: var(--header-bg-dark);
+        }
+        #chatbot-header h3 {
+            font-weight: 600;
+            color: var(--text-color-light);
+        }
+        body.dark #chatbot-header h3 {
+            color: var(--text-color-dark);
+        }
+        #chatbot-close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+        #chatbot-close-btn .lucide { color: var(--input-btn-text-light); }
+        body.dark #chatbot-close-btn .lucide { color: var(--input-btn-text-dark); }
+        #chatbot-close-btn:hover { background-color: var(--bg-color-light); }
+        body.dark #chatbot-close-btn:hover { background-color: color-mix(in srgb, var(--card-bg-dark) 80%, white 5%); }
+
+        /* Chat history and input within floating chatbot */
+        #chatbot-chat-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        #chatbot-chat-input-area {
+            flex-shrink: 0;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color-light);
+            background-color: var(--header-bg-light);
+        }
+        body.dark #chatbot-chat-input-area {
+            border-color: var(--border-color-dark);
+            background-color: var(--header-bg-dark);
+        }
+        
+        /* Message styles within floating chatbot - directly from inspiration */
+        .chat-message { margin-bottom: 0.75rem; padding: 1rem; border-radius: 1.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); word-break: break-word; transition: all 0.3s ease; transform: scale(0.95); transform-origin: bottom; max-width: 85%; position: relative; padding-bottom: 2.5rem; }
+        .chat-message.user { background-color: var(--user-msg-bg-light); color: var(--user-msg-text-light); margin-left: auto; border-bottom-right-radius: 0.5rem; }
+        body.dark .chat-message.user { background-color: var(--user-msg-bg-dark); color: var(--user-msg-text-dark); }
+        .chat-message.ai { background-color: var(--ai-msg-bg-light); color: var(--ai-msg-text-light); margin-right: auto; border-bottom-left-radius: 0.5rem; }
+        body.dark .chat-message.ai { background-color: var(--ai-msg-bg-dark); color: var(--ai-msg-text-dark); }
+        .loader-dot { width: 12px; height: 12px; margin: 0 4px; background-color: #888; border-radius: 50%; display: inline-block; animation: bounce 1.4s infinite ease-in-out both; }
+        .loader-dot:nth-child(1) { animation-delay: -0.32s; } .loader-dot:nth-child(2) { animation-delay: -0.16s; } .loader-dot:nth-child(3) { animation-delay: 0s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1.0); opacity: 1; } }
+
+        /* Scrollbar styles */
+        #chatbot-chat-history::-webkit-scrollbar, #content-area::-webkit-scrollbar { width: 10px; }
+        #chatbot-chat-history::-webkit-scrollbar-track, #content-area::-webkit-scrollbar-track { background: var(--card-bg-light); border-radius: 5px; }
+        #chatbot-chat-history::-webkit-scrollbar-thumb, #content-area::-webkit-scrollbar-thumb { background: #888; border-radius: 5px; border: 2px solid var(--card-bg-light); }
+        #chatbot-chat-history::-webkit-scrollbar-thumb:hover, #content-area::-webkit-scrollbar-thumb:hover { background: #555; }
+        body.dark #chatbot-chat-history::-webkit-scrollbar-track, body.dark #content-area::-webkit-scrollbar-track { background: var(--card-bg-dark); }
+        body.dark #chatbot-chat-history::-webkit-scrollbar-thumb, body.dark #content-area::-webkit-scrollbar-thumb { background: #6b7280; border-color: var(--card-bg-dark); }
+        body.dark #chatbot-chat-history::-webkit-scrollbar-thumb:hover, body.dark #content-area::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        /* Code block styles (from inspiration) */
+        .code-block-container { position: relative; background-color: var(--bg-color-dark); color: var(--text-color-dark); border-radius: 0.75rem; margin-top: 1rem; margin-bottom: 1rem; overflow: hidden; border: 1px solid var(--border-color-dark); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .code-block-container pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; font-size: 0.9em; line-height: 1.4; }
+        .code-block-header { display: flex; justify-content: space-between; align-items: center; background-color: var(--input-btn-bg-dark); color: var(--input-btn-text-dark); padding: 0.5rem 1rem; border-bottom: 1px solid color-mix(in srgb, var(--border-color-dark) 70%, transparent); font-size: 0.85em; border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
+        .code-block-copy-button { background-color: transparent; border: none; color: var(--input-btn-text-dark); cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 0.375rem; transition: background-color 0.2s ease, color 0.2s ease; display: flex; align-items: center; gap: 0.25rem; font-size: 0.85em; }
+        .code-block-copy-button:hover { background-color: color-mix(in srgb, var(--input-btn-bg-dark) 80%, var(--accent-primary-dark) 20%); color: var(--text-color-dark); }
+        .code-block-copy-button:active { transform: scale(0.95); }
+        .chat-message.ai .message-content code:not(pre > code) { background-color: color-mix(in srgb, var(--accent-primary) 20%, transparent); border-radius: 0.25rem; padding: 0.2em 0.4em; font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; font-size: 0.9em; color: var(--accent-primary); }
+        body.dark .chat-message.ai .message-content code:not(pre > code) { background-color: color-mix(in srgb, var(--accent-primary-dark) 20%, transparent); color: var(--accent-primary-dark); }
+        .chat-message.ai .message-content a { color: var(--accent-primary); text-decoration: underline; transition: color 0.2s ease; }
+        .chat-message.ai .message-content a:hover { color: color-mix(in srgb, var(--accent-primary) 80%, black 20%); }
+        body.dark .chat-message.ai .message-content a { color: var(--accent-primary-dark); }
+        body.dark .chat-message.ai .message-content a:hover { color: color-mix(in srgb, var(--accent-primary-dark) 80%, white 20%); }
+
+        .message-actions { position: absolute; bottom: 0.5rem; right: 1rem; display: flex; gap: 0.5rem; padding: 0.25rem 0.5rem; background-color: rgba(255, 255, 255, 0.6); border-radius: 0.75rem; backdrop-filter: blur(5px); transition: opacity 0.3s ease; opacity: 0; z-index: 10; }
+        .chat-message:hover .message-actions { opacity: 1; }
+        body.dark .message-actions { background-color: rgba(0, 0, 0, 0.4); }
+        .message-actions button { background: none; border: none; cursor: pointer; padding: 0.25rem; border-radius: 0.375rem; transition: background-color 0.2s ease, color 0.2s ease; display: flex; align-items: center; justify-content: center; }
+        .message-actions button .lucide { color: var(--input-btn-text-light); width: 1rem; height: 1rem; }
+        body.dark .message-actions button .lucide { color: var(--input-btn-text-dark); }
+        .message-actions button:hover .lucide { color: var(--accent-primary); }
+        body.dark .message-actions button:hover .lucide { color: var(--accent-primary-dark); }
+        .message-actions button:hover { background-color: rgba(0, 0, 0, 0.1); }
+        body.dark .message-actions button:hover { background-color: rgba(255, 255, 255, 0.1); }
+
+        .actions-dropdown { position: absolute; bottom: calc(100% + 8px); right: 0; background-color: var(--card-bg-light); border-radius: 1rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); padding: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; transform-origin: bottom right; transition: transform 0.2s ease-out, opacity 0.2s ease-out; z-index: 20; border: 1px solid var(--border-color-light); min-width: 140px; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+        body.dark .actions-dropdown { background-color: var(--card-bg-dark); border-color: var(--border-color-dark); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+        .actions-dropdown.hidden { opacity: 0; transform: scale(0.9); pointer-events: none; }
+        .actions-dropdown button, .actions-dropdown label { display: flex; align-items: center; padding: 0.5rem 0.75rem; border-radius: 0.75rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; color: var(--text-color-light); }
+        body.dark .actions-dropdown button, body.dark .actions-dropdown label { color: var(--text-color-dark); }
+        .actions-dropdown button:hover, .actions-dropdown label:hover { background-color: var(--bg-color-light); }
+        body.dark .actions-dropdown button:hover, body.dark .actions-dropdown label:hover { background-color: color-mix(in srgb, var(--card-bg-dark) 80%, var(--accent-primary-dark) 5%); }
+        .actions-dropdown button .lucide, .actions-dropdown label .lucide { margin-right: 0.5rem; width: 1.25rem; height: 1.25rem; flex-shrink: 0; color: var(--accent-primary); }
+        body.dark .actions-dropdown button .lucide, body.dark .actions-dropdown label .lucide { color: var(--accent-primary-dark); }
+        
+        .voice-input-active { background-color: var(--accent-error) !important; animation: pulse-red 1s infinite cubic-bezier(0.4, 0, 0.6, 1); }
+        @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-error) 70%, transparent); } 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent-error) 0%, transparent); } }
+
+        /* General form for creating new items */
+        .new-item-form {
+            background-color: var(--card-bg-light);
+            border: 1px solid var(--border-color-light);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        body.dark .new-item-form {
+            background-color: var(--card-bg-dark);
+            border-color: var(--border-color-dark);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .new-item-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color-light);
+        }
+        body.dark .new-item-form label { color: var(--text-color-dark); }
+        .new-item-form input[type="text"],
+        .new-item-form input[type="number"],
+        .new-item-form input[type="date"],
+        .new-item-form select,
+        .new-item-form textarea {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color-light);
+            border-radius: 0.75rem;
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+            transition: all 0.2s ease;
+        }
+        body.dark .new-item-form input,
+        body.dark .new-item-form select,
+        body.dark .new-item-form textarea {
+            border-color: var(--border-color-dark);
+            background-color: var(--input-btn-bg-dark);
+            color: var(--text-color-dark);
+        }
+        .new-item-form input:focus,
+        .new-item-form select:focus,
+        .new-item-form textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 30%, transparent);
+        }
+        body.dark .new-item-form input:focus,
+        body.dark .new-item-form select:focus,
+        body.dark .new-item-form textarea:focus {
+            border-color: var(--accent-primary-dark);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary-dark) 30%, transparent);
+        }
+        .new-item-form button[type="submit"] {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        body.dark .new-item-form button[type="submit"] {
+            background-color: var(--accent-primary-dark);
+        }
+        .new-item-form button[type="submit"]:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .new-item-form .flex-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .new-item-form .flex-row > div {
+            flex: 1;
+        }
+
+        /* User Switcher Modal */
+        #user-switcher-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 150;
+        }
+        #user-switcher-modal-content {
+            background-color: var(--card-bg-light);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: min(90%, 400px);
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        body.dark #user-switcher-modal-content {
+            background-color: var(--card-bg-dark);
+        }
+        #user-switcher-modal-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        #current-user-display {
+            background-color: var(--input-btn-bg-light);
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-color-light);
+        }
+        body.dark #current-user-display {
+            background-color: var(--input-btn-bg-dark);
+            color: var(--text-color-dark);
+        }
+        #user-list button {
+            display: flex; /* Added flex for icon */
+            align-items: center; /* Align items */
+            gap: 0.75rem; /* Space between icon and text */
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border: none;
+            background-color: transparent;
+            color: var(--text-color-light);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-bottom: 0.5rem;
+        }
+        body.dark #user-list button { color: var(--text-color-dark); }
+        #user-list button:hover { background-color: var(--bg-color-light); }
+        body.dark #user-list button:hover { background-color: color-mix(in srgb, var(--card-bg-dark) 80%, white 5%); }
+        #user-list button.active {
+            background-color: var(--accent-primary);
+            color: white;
+            font-weight: 600;
+        }
+        body.dark #user-list button.active {
+            background-color: var(--accent-primary-dark);
+        }
+        #user-list button.active .lucide { color: white !important; }
+        #new-username-input {
+            width: calc(100% - 3rem); /* Adjust for button */
+            padding: 0.75rem;
+            border: 1px solid var(--border-color-light);
+            border-radius: 0.75rem 0 0 0.75rem;
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+        }
+        body.dark #new-username-input {
+            border-color: var(--border-color-dark);
+            background-color: var(--input-btn-bg-dark);
+            color: var(--text-color-dark);
+        }
+        #create-user-btn {
+            width: 3rem;
+            padding: 0.75rem;
+            border: none;
+            background-color: var(--accent-primary);
+            color: white;
+            border-radius: 0 0.75rem 0.75rem 0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        body.dark #create-user-btn { background-color: var(--accent-primary-dark); }
+        #create-user-btn:hover { opacity: 0.9; }
+
+        /* API Key Warning */
+        #api-key-warning {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #fef2f2; /* Red-50 */
+            border: 1px solid #ef4444; /* Red-500 */
+            color: #dc2626; /* Red-600 */
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            animation: fadeInOut 8s ease-in-out forwards;
+        }
+        body.dark #api-key-warning {
+            background-color: #450a0a; /* Red-950 */
+            border-color: #fca5a5; /* Red-300 */
+            color: #fecaca; /* Red-200 */
+        }
+        #api-key-warning button {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 50%;
+        }
+        #api-key-warning button:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); pointer-events: none; }
+        }
+
+    </style>
+</head>
+<body class="antialiased theme-default dark">
+
+    <!-- API Key Warning - WILL BE SHOWN ON LOAD IF KEY IS DEFAULT -->
+    <div id="api-key-warning" class="hidden">
+        <span data-lucide="shield-alert" class="w-5 h-5 flex-shrink-0"></span>
+        <p><strong>Security Alert:</strong> Your Gemini API key is exposed in this frontend-only file. For production, use a backend proxy to secure it.</p>
+        <button onclick="document.getElementById('api-key-warning').remove()" title="Dismiss">
+            <span data-lucide="x" class="w-4 h-4"></span>
+        </button>
+    </div>
+
+    <!-- Main Application Header -->
+    <div class="header-section p-4 md:p-6 flex justify-between items-center border-b flex-shrink-0">
+        <h1 class="text-2xl sm:text-3xl font-bold">AI Journal</h1>
+        <div class="flex items-center space-x-4 relative">
+            <!-- Theme Selector -->
+            <div class="relative">
+                <button id="theme-selector-btn" aria-label="Select Theme" class="flex items-center justify-center w-10 h-10 rounded-full shadow-sm transition-all duration-300 flex-shrink-0">
+                    <span data-lucide="palette" class="w-5 h-5"></span>
+                </button>
+                <div id="theme-dropdown" class="actions-dropdown hidden left-0 right-auto" style="bottom: auto; top: calc(100% + 8px);">
+                    <button class="theme-option w-full justify-start text-left" data-theme="default">
+                        <span data-lucide="sun" class="w-5 h-5"></span> Default
+                    </button>
+                    <button class="theme-option w-full justify-start text-left" data-theme="badass-black">
+                        <span data-lucide="moon" class="w-5 h-5"></span> Badass Black
+                    </button>
+                    <button class="theme-option w-full justify-start text-left" data-theme="golden-glory">
+                        <span data-lucide="sparkles" class="w-5 h-5"></span> Golden Glory
+                    </button>
+                    <button class="theme-option w-full justify-start text-left" data-theme="minimal-criminal">
+                        <span data-lucide="square" class="w-5 h-5"></span> Minimal Criminal
+                    </button>
+                    <button class="theme-option w-full justify-start text-left" data-theme="la-futura">
+                        <span data-lucide="zap" class="w-5 h-5"></span> La Futura
+                    </button>
+                    <button class="theme-option w-full justify-left" data-theme="gods-plan">
+                        <span data-lucide="leaf" class="w-5 h-5"></span> God's Plan
+                    </button>
+                    <button class="theme-option w-full justify-start text-left" data-theme="the-ecstacy">
+                        <span data-lucide="star" class="w-5 h-5"></span> The Ecstacy
+                    </button>
+                </div>
+            </div>
+
+            <!-- New Chat Button -->
+            <button id="new-chat-btn" aria-label="Start New Chat" class="flex items-center justify-center w-10 h-10 rounded-full shadow-sm transition-all duration-300 flex-shrink-0">
+                <span data-lucide="message-square-plus" class="w-5 h-5"></span>
+            </button>
+            
+            <!-- Switch User Button -->
+            <button id="switch-user-btn" aria-label="Switch User" class="flex items-center justify-center w-10 h-10 rounded-full shadow-sm transition-all duration-300 flex-shrink-0">
+                <span data-lucide="user-round" class="w-5 h-5"></span>
+            </button>
+
+            <!-- Dark Mode Toggle -->
+            <span class="text-gray-500 text-sm hidden sm:inline">Light</span>
+            <label class="switch relative inline-block w-14 h-8">
+                <input type="checkbox" id="dark-mode-toggle" class="opacity-0 w-0 h-0">
+                <span class="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 rounded-full before:absolute before:content-[''] before:h-6 before:w-6 before:left-1 before:bottom-1 before:rounded-full"></span>
+            </label>
+            <span class="text-gray-500 text-sm hidden sm:inline">Dark</span>
+        </div>
+    </div>
+    
+    <!-- Main Application Container (Sidebar + Content) -->
+    <div id="main-app-container">
+        <!-- Navigation Sidebar -->
+        <nav id="main-nav">
+            <button id="nav-journal" class="active" data-section="journal">
+                <span data-lucide="book-open-text" class="w-5 h-5 text-current"></span>
+                Journal
+            </button>
+            <button id="nav-goals" data-section="goals">
+                <span data-lucide="target" class="w-5 h-5 text-current"></span>
+                Goals
+            </button>
+            <button id="nav-todos" data-section="todos">
+                <span data-lucide="check-square" class="w-5 h-5 text-current"></span>
+                To-Dos
+            </button>
+            <button id="nav-notes" data-section="notes">
+                <span data-lucide="sticky-note" class="w-5 h-5 text-current"></span>
+                Notes
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="content-area">
+            <!-- Journal Section -->
+            <section id="section-journal" class="mb-8">
+                <h2 class="text-3xl font-bold mb-6">My Journals</h2>
+                <div id="journal-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Journal entries will be rendered here -->
+                    <div class="data-card journal-entry hidden" id="journal-template">
+                        <div class="card-actions">
+                            <button class="edit-btn" title="Edit Journal"><span data-lucide="edit" class="w-4 h-4"></span></button>
+                            <button class="delete-btn" title="Delete Journal"><span data-lucide="trash-2" class="w-4 h-4"></span></button>
+                        </div>
+                        <p class="journal-date text-sm"></p>
+                        <h3 class="text-xl font-semibold mb-2 card-title"></h3>
+                        <div class="card-content"></div>
+                        <p class="journal-mood text-sm mt-2"><span data-lucide="smile" class="w-4 h-4"></span> <span class="mood-text"></span></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Goals Section -->
+            <section id="section-goals" class="hidden mb-8">
+                <h2 class="text-3xl font-bold mb-6">My Goals</h2>
+                <div id="goal-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Goal entries will be rendered here -->
+                    <div class="data-card goal-entry hidden" id="goal-template">
+                        <div class="card-actions">
+                            <button class="edit-btn" title="Edit Goal"><span data-lucide="edit" class="w-4 h-4"></span></button>
+                            <button class="delete-btn" title="Delete Goal"><span data-lucide="trash-2" class="w-4 h-4"></span></button>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2 card-title"></h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 card-description"></p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: 0%;">0%</div>
+                        </div>
+                        <p class="goal-status"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- To-Dos Section -->
+            <section id="section-todos" class="hidden mb-8">
+                <h2 class="text-3xl font-bold mb-6">My To-Dos</h2>
+                <div class="data-card">
+                    <ul id="todo-list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <!-- To-Do items will be rendered here -->
+                        <li class="todo-item hidden" id="todo-template">
+                            <input type="checkbox" class="todo-checkbox" aria-label="Mark as complete">
+                            <span class="flex-grow card-text"></span>
+                            <span class="todo-priority"></span>
+                            <div class="card-actions flex-row static top-0 right-0"> <!-- Static position for in-list actions -->
+                                <button class="edit-btn" title="Edit To-Do"><span data-lucide="edit" class="w-4 h-4"></span></button>
+                                <button class="delete-btn" title="Delete To-Do"><span data-lucide="trash-2" class="w-4 h-4"></span></button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Notes Section -->
+            <section id="section-notes" class="hidden mb-8">
+                <h2 class="text-3xl font-bold mb-6">My Notes</h2>
+                <div id="note-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Note items will be rendered here -->
+                    <div class="data-card note-item hidden" id="note-template">
+                        <div class="card-actions">
+                            <button class="edit-btn" title="Edit Note"><span data-lucide="edit" class="w-4 h-4"></span></button>
+                            <button class="delete-btn" title="Delete Note"><span data-lucide="trash-2" class="w-4 h-4"></span></button>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2 card-title"></h3>
+                        <div class="card-content"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Floating Chatbot Button -->
+    <button id="floating-chatbot-btn" aria-label="Open AI Chatbot">
+        <span data-lucide="message-square-text" class="w-8 h-8"></span>
+    </button>
+
+    <!-- Floating Chatbot Container -->
+    <div id="floating-chatbot-container">
+        <div id="chatbot-header">
+            <h3>Talk to AI</h3>
+            <button id="chatbot-close-btn" aria-label="Close Chatbot">
+                <span data-lucide="x" class="w-5 h-5"></span>
+            </button>
+        </div>
+        
+        <div id="chatbot-chat-history">
+            <!-- Chat messages will be appended here by JS -->
+        </div>
+        
+        <div id="chatbot-chat-input-area" class="relative">
+            <!-- Dynamic error message for chat -->
+            <div id="chat-error-message" class="hidden mb-2 p-3 rounded-lg text-sm items-center gap-2" role="alert">
+                <span class="icon-placeholder w-5 h-5 flex-shrink-0"></span>
+                <span id="chat-error-text"></span>
+            </div>
+
+            <div class="flex gap-2 items-end">
+                <input type="text" id="chatbot-chat-input" class="chat-input p-3 rounded-full border transition-colors shadow-sm w-full" placeholder="Ask AI to manage your journal...">
+                
+                <!-- Chat Actions Dropdown (Voice/Attachments - simplified for floating chat) -->
+                <div id="chatbot-chat-actions-dropdown" class="actions-dropdown hidden">
+                    <button id="chatbot-voice-input-btn" class="w-full justify-start text-left">
+                        <span data-lucide="mic" class="w-5 h-5"></span> Voice Input
+                    </button>
+                </div>
+                
+                <button id="chatbot-add-attachment-btn" aria-label="Add attachment or voice input" class="flex items-center justify-center w-10 h-10 rounded-full shadow-lg cursor-pointer transition-all duration-300 flex-shrink-0">
+                    <span data-lucide="plus" class="w-5 h-5"></span>
+                </button>
+
+                <button id="chatbot-send-btn" aria-label="Send Message" class="flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-all duration-300 disabled:cursor-not-allowed flex-shrink-0">
+                    <span data-lucide="send" class="w-5 h-5"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Switcher Modal -->
+    <div id="user-switcher-modal" class="hidden">
+        <div id="user-switcher-modal-content">
+            <h3 class="mb-4">Switch User</h3>
+            <p id="current-user-display" class="mb-4">
+                <span data-lucide="user-round" class="w-5 h-5"></span>
+                Current User: <span id="current-username-text" class="font-bold">Default User</span>
+            </p>
+            <div id="user-list" class="mb-4 max-h-48 overflow-y-auto">
+                <p class="text-sm text-gray-500 mb-2">Select a user or create new:</p>
+                <!-- User buttons will be dynamically added here -->
+            </div>
+            <div class="flex">
+                <input type="text" id="new-username-input" placeholder="Enter new username">
+                <button id="create-user-btn" aria-label="Create User">
+                    <span data-lucide="plus" class="w-5 h-5"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Register Service Worker for PWA capabilities
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+
+        // --- GLOBAL APP VARIABLES ---
+        const USER_DB_NAME = 'AIJournalDB';
+        const USER_DB_VERSION = 1;
+        const USER_STORE_NAMES = ['journals', 'goals', 'todos', 'notes', 'users', 'chat_history'];
+        let db; // IndexedDB instance
+        let currentUserId = localStorage.getItem('currentUserId') || 'default-user'; // Unique ID for current user
+        let currentUserName = localStorage.getItem('currentUserName') || 'Default User'; // Display name for current user
+
+        // --- GEMINI API Key ---
+        // !! IMPORTANT: REPLACE WITH YOUR ACTUAL GEMINI API KEY !!
+        // !! DO NOT USE THIS METHOD IN PRODUCTION. USE A SERVER-SIDE PROXY TO PROTECT YOUR KEY. !!
+        // The key below is a placeholder and WILL NOT WORK.
+        // Get your API key from Google AI Studio: https://makersuite.google.com/
+        const GEMINI_API_KEY = 'AIzaSyCzx6ReMk8ohPJcCjGwHHzu7SvFccJqAbA'; // <--- REPLACE THIS WITH YOUR ACTUAL KEY
+
+        // Show API Key warning on load
+        window.addEventListener('load', () => {
+            const warningDiv = document.getElementById('api-key-warning');
+            if (warningDiv && (GEMINI_API_KEY === "" || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE")) {
+                warningDiv.classList.remove('hidden');
+            }
+        });
+
+
+        // --- CHATBOT UI ELEMENTS (from inspiration) ---
+        const floatingChatbotBtn = document.getElementById('floating-chatbot-btn');
+        const floatingChatbotContainer = document.getElementById('floating-chatbot-container');
+        const chatbotCloseBtn = document.getElementById('chatbot-close-btn');
+        const chatbotChatHistoryDiv = document.getElementById('chatbot-chat-history');
+        const chatbotChatInput = document.getElementById('chatbot-chat-input');
+        const chatbotSendBtn = document.getElementById('chatbot-send-btn');
+        const chatbotVoiceInputBtn = document.getElementById('chatbot-voice-input-btn');
+        const chatbotAddAttachmentBtn = document.getElementById('chatbot-add-attachment-btn');
+        const chatbotActionsDropdown = document.getElementById('chatbot-chat-actions-dropdown');
+        const chatErrorMessageDiv = document.getElementById('chat-error-message');
+        const chatErrorText = document.getElementById('chat-error-text');
+        
+        let chatbotChatHistory = []; // Conversation history for the Gemini API
+        let chatbotIsSpeaking = false;
+        let chatbotCurrentUtterance = null;
+        let chatbotMessageTextCache = new Map(); // Store message content for copy/dictate
+
+        // Speech Recognition variables for chatbot
+        let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isVoiceInputActive = false;
+        let finalTranscript = '';
+
+        // --- APP UI ELEMENTS ---
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const themeSelectorBtn = document.getElementById('theme-selector-btn');
+        const themeDropdown = document.getElementById('theme-dropdown');
+        const themeOptions = document.querySelectorAll('.theme-option');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const navButtons = document.querySelectorAll('#main-nav button');
+        const contentArea = document.getElementById('content-area');
+
+        // Sections
+        const sectionJournal = document.getElementById('section-journal');
+        const journalList = document.getElementById('journal-list');
+        const journalTemplate = document.getElementById('journal-template');
+
+        const sectionGoals = document.getElementById('section-goals');
+        const goalList = document.getElementById('goal-list');
+        const goalTemplate = document.getElementById('goal-template');
+
+        const sectionTodos = document.getElementById('section-todos');
+        const todoList = document.getElementById('todo-list');
+        const todoTemplate = document.getElementById('todo-template');
+
+        const sectionNotes = document.getElementById('section-notes');
+        const noteList = document.getElementById('note-list');
+        const noteTemplate = document.getElementById('note-template');
+        
+        // User Switcher Modal elements
+        const userSwitcherModal = document.getElementById('user-switcher-modal');
+        const switchUserBtn = document.getElementById('switch-user-btn');
+        const currentUsernameText = document.getElementById('current-username-text');
+        const userListDiv = document.getElementById('user-list');
+        const newUsernameInput = document.getElementById('new-username-input');
+        const createUserBtn = document.getElementById('create-user-btn');
+
+        // This function call is from the Lucide Icon library to replace all `<span>` tags with the corresponding SVG icons
+        const createIcons = () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        };
+
+        // --- THEME AND DARK MODE LOGIC ---
+        const ALL_THEME_CLASSES = ['theme-default', 'theme-badass-black', 'theme-golden-glory', 'theme-minimal-criminal', 'theme-la-futura', 'theme-gods-plan', 'theme-the-ecstacy'];
+
+        function applyTheme(themeName) {
+            document.body.classList.remove(...ALL_THEME_CLASSES);
+            document.body.classList.add(`theme-${themeName}`);
+            localStorage.setItem('selected-theme', themeName);
+        }
+
+        function applyDarkMode(isDark) {
+            if (isDark) {
+                document.body.classList.remove('light');
+                document.body.classList.add('dark');
+            } else {
+                document.body.classList.remove('dark');
+                document.body.classList.add('light');
+            }
+            localStorage.setItem('dark-mode', isDark);
+        }
+
+        // --- IndexedDB Functions ---
+        const openDB = () => {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(USER_DB_NAME, USER_DB_VERSION);
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    USER_STORE_NAMES.forEach(storeName => {
+                        if (!db.objectStoreNames.contains(storeName)) {
+                            db.createObjectStore(storeName, { keyPath: 'id' });
+                        }
+                    });
+                };
+
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+
+                request.onerror = (event) => {
+                    console.error("IndexedDB error:", event.target.errorCode);
+                    reject(event.target.error);
+                };
+            });
+        };
+
+        const saveRecord = (storeName, record) => {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.put({ ...record, userId: currentUserId }); // Add userId for multi-user support
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        };
+
+        const getRecords = (storeName) => {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result.filter(record => record.userId === currentUserId));
+                request.onerror = (event) => reject(event.target.error);
+            });
+        };
+
+        const getRecord = (storeName, id) => {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.get(id);
+                request.onsuccess = () => {
+                    const record = request.result;
+                    if (record && record.userId === currentUserId) {
+                        resolve(record);
+                    } else {
+                        resolve(null); // Not found or not belonging to current user
+                    }
+                };
+                request.onerror = (event) => reject(event.target.error);
+            });
+        };
+
+        const updateRecord = async (storeName, id, updates) => {
+            const existing = await getRecord(storeName, id);
+            if (!existing) throw new Error(`Record with ID ${id} not found or does not belong to user.`);
+            const updatedRecord = { ...existing, ...updates };
+            return saveRecord(storeName, updatedRecord);
+        };
+
+        const deleteRecord = (storeName, id) => {
+            return new Promise(async (resolve, reject) => {
+                const existing = await getRecord(storeName, id);
+                if (!existing) {
+                    resolve(false); // Already not found or not belonging to user
+                    return;
+                }
+                const transaction = db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.delete(id);
+                request.onsuccess = () => resolve(true);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        };
+
+        const getAllUsers = async () => {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction('users', 'readonly');
+                const store = transaction.objectStore('users');
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        };
+
+        const saveUser = async (user) => {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction('users', 'readwrite');
+                const store = transaction.objectStore('users');
+                const request = store.put(user);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        };
+
+        // --- UI Rendering Functions ---
+        function renderJournals() {
+            journalList.innerHTML = '';
+            getRecords('journals').then(journals => {
+                journals.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort by date desc
+                if (journals.length === 0) {
+                    journalList.innerHTML = `<p class="text-gray-500 text-center col-span-full">No journal entries yet. Ask the AI to write one!</p>`;
+                    return;
+                }
+                journals.forEach(journal => {
+                    const entry = journalTemplate.cloneNode(true);
+                    entry.id = `journal-${journal.id}`;
+                    entry.classList.remove('hidden');
+                    entry.querySelector('.journal-date').textContent = new Date(journal.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    entry.querySelector('.card-title').textContent = journal.title;
+                    entry.querySelector('.card-content').innerHTML = marked.parse(journal.content);
+                    const moodElement = entry.querySelector('.journal-mood');
+                    if (journal.mood) {
+                        moodElement.querySelector('.mood-text').textContent = `Mood: ${journal.mood}`;
+                        updateButtonIcon(moodElement.querySelector('.lucide'), getMoodIcon(journal.mood), 'w-4 h-4');
+                        moodElement.classList.remove('hidden');
+                    } else {
+                        moodElement.classList.add('hidden');
+                    }
+                    entry.dataset.id = journal.id;
+
+                    entry.querySelector('.edit-btn').addEventListener('click', (e) => handleEdit('journal', journal.id, journal));
+                    entry.querySelector('.delete-btn').addEventListener('click', (e) => handleDelete('journal', journal.id));
+                    
+                    journalList.appendChild(entry);
+                });
+                createIcons(); // Render Lucide icons
+            }).catch(e => showChatError(`Failed to load journals: ${e.message}`, 'error'));
+        }
+
+        function getMoodIcon(mood) {
+            mood = mood.toLowerCase();
+            if (mood.includes('happy') || mood.includes('joy')) return 'smile';
+            if (mood.includes('sad') || mood.includes('depressed')) return 'frown';
+            if (mood.includes('angry') || mood.includes('frustrated')) return 'angry';
+            if (mood.includes('neutral') || mood.includes('calm')) return 'meh';
+            if (mood.includes('excited') || mood.includes('energetic')) return 'zap';
+            if (mood.includes('stressed') || mood.includes('anxious')) return 'alert-octagon';
+            return 'smile'; // Default
+        }
+
+        function renderGoals() {
+            goalList.innerHTML = '';
+            getRecords('goals').then(goals => {
+                goals.sort((a, b) => (new Date(a.dueDate || 0).getTime() || 0) - (new Date(b.dueDate || 0).getTime() || 0)); // Sort by due date
+                if (goals.length === 0) {
+                    goalList.innerHTML = `<p class="text-gray-500 text-center col-span-full">No goals set yet. Ask the AI to help you set one!</p>`;
+                    return;
+                }
+                goals.forEach(goal => {
+                    const entry = goalTemplate.cloneNode(true);
+                    entry.id = `goal-${goal.id}`;
+                    entry.classList.remove('hidden');
+                    entry.querySelector('.card-title').textContent = goal.title;
+                    entry.querySelector('.card-description').textContent = goal.description;
+                    const progressBarFill = entry.querySelector('.progress-bar-fill');
+                    const progress = Math.max(0, Math.min(100, goal.progress || 0)); // Ensure 0-100
+                    progressBarFill.style.width = `${progress}%`;
+                    progressBarFill.textContent = `${progress}%`;
+                    entry.querySelector('.goal-status').textContent = `Status: ${goal.status || 'Not Started'}${goal.dueDate ? ` | Due: ${new Date(goal.dueDate).toLocaleDateString()}` : ''}`;
+                    entry.dataset.id = goal.id;
+
+                    entry.querySelector('.edit-btn').addEventListener('click', (e) => handleEdit('goal', goal.id, goal));
+                    entry.querySelector('.delete-btn').addEventListener('click', (e) => handleDelete('goal', goal.id));
+
+                    goalList.appendChild(entry);
+                });
+                createIcons();
+            }).catch(e => showChatError(`Failed to load goals: ${e.message}`, 'error'));
+        }
+
+        function renderTodos() {
+            todoList.innerHTML = ''; // Clear only items, not the template
+            getRecords('todos').then(todos => {
+                todos.sort((a, b) => (new Date(a.dueDate || 0).getTime() || 0) - (new Date(b.dueDate || 0).getTime() || 0) || (getPriorityValue(b.priority) - getPriorityValue(a.priority)));
+                if (todos.length === 0) {
+                    todoList.innerHTML = `<p class="text-gray-500 text-center">No to-do items yet. Ask the AI to add one!</p>`;
+                    return;
+                }
+                todos.forEach(todo => {
+                    const entry = todoTemplate.cloneNode(true);
+                    entry.id = `todo-${todo.id}`;
+                    entry.classList.remove('hidden');
+                    entry.querySelector('.card-text').textContent = todo.text;
+                    const checkbox = entry.querySelector('.todo-checkbox');
+                    checkbox.checked = todo.completed;
+                    entry.classList.toggle('completed', todo.completed);
+                    checkbox.addEventListener('change', () => toggleTodoComplete(todo.id, checkbox.checked));
+
+                    const prioritySpan = entry.querySelector('.todo-priority');
+                    if (todo.priority) {
+                        prioritySpan.textContent = todo.priority;
+                        prioritySpan.className = `todo-priority priority-${todo.priority.toLowerCase()}`;
+                    } else {
+                        prioritySpan.remove();
+                    }
+                    
+                    entry.dataset.id = todo.id;
+
+                    entry.querySelector('.edit-btn').addEventListener('click', (e) => handleEdit('todo', todo.id, todo));
+                    entry.querySelector('.delete-btn').addEventListener('click', (e) => handleDelete('todo', todo.id));
+
+                    todoList.appendChild(entry);
+                });
+                createIcons();
+            }).catch(e => showChatError(`Failed to load todos: ${e.message}`, 'error'));
+        }
+
+        function getPriorityValue(priority) {
+            if (!priority) return 0;
+            switch (priority.toLowerCase()) {
+                case 'high': return 3;
+                case 'medium': return 2;
+                case 'low': return 1;
+                default: return 0;
+            }
+        }
+
+        function renderNotes() {
+            noteList.innerHTML = '';
+            getRecords('notes').then(notes => {
+                notes.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort by date desc
+                if (notes.length === 0) {
+                    noteList.innerHTML = `<p class="text-gray-500 text-center col-span-full">No notes yet. Ask the AI to jot something down!</p>`;
+                    return;
+                }
+                notes.forEach(note => {
+                    const entry = noteTemplate.cloneNode(true);
+                    entry.id = `note-${note.id}`;
+                    entry.classList.remove('hidden');
+                    entry.querySelector('.card-title').textContent = note.title;
+                    entry.querySelector('.card-content').innerHTML = marked.parse(note.content);
+                    entry.dataset.id = note.id;
+
+                    entry.querySelector('.edit-btn').addEventListener('click', (e) => handleEdit('note', note.id, note));
+                    entry.querySelector('.delete-btn').addEventListener('click', (e) => handleDelete('note', note.id));
+
+                    noteList.appendChild(entry);
+                });
+                createIcons();
+            }).catch(e => showChatError(`Failed to load notes: ${e.message}`, 'error'));
+        }
+
+        // --- Core UI Management ---
+        function navigateToSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('#content-area section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            // Show the requested section
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+
+            // Update active navigation button
+            navButtons.forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.section === sectionId) {
+                    button.classList.add('active');
+                }
+            });
+
+            // Re-render content for the active section
+            switch (sectionId) {
+                case 'journal': renderJournals(); break;
+                case 'goals': renderGoals(); break;
+                case 'todos': renderTodos(); break;
+                case 'notes': renderNotes(); break;
+            }
+        }
+
+        // --- CRUD Functions for AI to call ---
+
+        // Journal
+        async function createJournal(title, content, mood) {
+            const id = `journal_${Date.now()}`;
+            const newJournal = { id, title, content, mood, timestamp: new Date().toISOString() };
+            await saveRecord('journals', newJournal);
+            renderJournals();
+            showChatError(`Journal "${title}" created!`, 'success');
+        }
+
+        async function updateJournal(id, title, content, mood) {
+            await updateRecord('journals', id, { title, content, mood });
+            renderJournals();
+            showChatError(`Journal "${title}" updated!`, 'success');
+        }
+
+        async function deleteJournal(id) {
+            await deleteRecord('journals', id);
+            renderJournals();
+            showChatError(`Journal deleted!`, 'success');
+        }
+
+        // Goals
+        async function createGoal(title, description, targetValue, dueDate, progress = 0, status = 'Not Started') {
+            const id = `goal_${Date.now()}`;
+            const newGoal = { id, title, description, targetValue, dueDate, progress, status, timestamp: new Date().toISOString() };
+            await saveRecord('goals', newGoal);
+            renderGoals();
+            showChatError(`Goal "${title}" created!`, 'success');
+        }
+
+        async function updateGoal(id, progress, status, notes) {
+            const goal = await getRecord('goals', id);
+            if (goal) {
+                const updatedFields = {};
+                if (progress !== undefined) updatedFields.progress = progress;
+                if (status !== undefined) updatedFields.status = status;
+                if (notes !== undefined) updatedFields.notes = notes;
+                await updateRecord('goals', id, updatedFields);
+                renderGoals();
+                showChatError(`Goal "${goal.title}" updated!`, 'success');
+            } else {
+                showChatError(`Goal with ID ${id} not found.`, 'error');
+            }
+        }
+
+        async function deleteGoal(id) {
+            await deleteRecord('goals', id);
+            renderGoals();
+            showChatError(`Goal deleted!`, 'success');
+        }
+        
+        // To-Dos
+        async function addTodo(text, dueDate, priority = 'low', completed = false) {
+            const id = `todo_${Date.now()}`;
+            const newTodo = { id, text, dueDate, priority, completed, timestamp: new Date().toISOString() };
+            await saveRecord('todos', newTodo);
+            renderTodos();
+            showChatError(`To-Do "${text}" added!`, 'success');
+        }
+
+        async function toggleTodoComplete(id, completed) {
+            const todo = await getRecord('todos', id);
+            if (todo) {
+                await updateRecord('todos', id, { completed });
+                renderTodos();
+                showChatError(`To-Do "${todo.text}" marked as ${completed ? 'completed' : 'incomplete'}!`, 'success');
+            } else {
+                showChatError(`To-Do with ID ${id} not found.`, 'error');
+            }
+        }
+
+        async function deleteTodo(id) {
+            await deleteRecord('todos', id);
+            renderTodos();
+            showChatError(`To-Do deleted!`, 'success');
+        }
+
+        // Notes
+        async function addNote(title, content) {
+            const id = `note_${Date.now()}`;
+            const newNote = { id, title, content, timestamp: new Date().toISOString() };
+            await saveRecord('notes', newNote);
+            renderNotes();
+            showChatError(`Note "${title}" added!`, 'success');
+        }
+
+        async function updateNote(id, title, content) {
+            await updateRecord('notes', id, { title, content });
+            renderNotes();
+            showChatError(`Note "${title}" updated!`, 'success');
+        }
+
+        async function deleteNote(id) {
+            await deleteRecord('notes', id);
+            renderNotes();
+            showChatError(`Note deleted!`, 'success');
+        }
+
+        // Helper for direct UI edit/delete buttons
+        function handleEdit(type, id, data) {
+            // For simplicity, for direct UI edit, we'll prompt the user for new values
+            // In a real app, this would open a modal with pre-filled fields.
+            let newTitle, newContent, newMood, newProgress, newStatus, newPriority, newText; // Removed unused variables newDescription, newDueDate
+
+            switch (type) {
+                case 'journal':
+                    newTitle = prompt('Enter new title:', data.title);
+                    if (newTitle === null) return;
+                    newContent = prompt('Enter new content:', data.content);
+                    if (newContent === null) return;
+                    newMood = prompt('Enter new mood (e.g., Happy, Sad, Neutral):', data.mood);
+                    if (newMood === null) return;
+                    updateJournal(id, newTitle, newContent, newMood);
+                    break;
+                case 'goal':
+                    newProgress = prompt('Enter new progress (0-100):', data.progress);
+                    if (newProgress === null) return;
+                    newStatus = prompt('Enter new status (e.g., On Track, At Risk, Completed):', data.status);
+                    if (newStatus === null) return;
+                    updateGoal(id, parseInt(newProgress), newStatus);
+                    break;
+                case 'todo':
+                    newText = prompt('Enter new to-do text:', data.text);
+                    if (newText === null) return;
+                    newPriority = prompt('Enter new priority (High, Medium, Low):', data.priority);
+                    if (newPriority === null) return;
+                    updateRecord('todos', id, { text: newText, priority: newPriority });
+                    renderTodos();
+                    showChatError(`To-Do "${newText}" updated!`, 'success');
+                    break;
+                case 'note':
+                    newTitle = prompt('Enter new title:', data.title);
+                    if (newTitle === null) return;
+                    newContent = prompt('Enter new content:', data.content);
+                    if (newContent === null) return;
+                    updateNote(id, newTitle, newContent);
+                    break;
+            }
+        }
+
+        async function handleDelete(type, id) {
+            if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
+
+            switch (type) {
+                case 'journal': await deleteJournal(id); break;
+                case 'goal': await deleteGoal(id); break;
+                case 'todo': await deleteTodo(id); break;
+                case 'note': await deleteNote(id); break;
+            }
+        }
+
+        // --- AI CHATBOT LOGIC (adapted from inspiration) ---
+
+        /**
+         * System prompt to guide the AI on its capabilities and expected command format.
+         * This prompt is crucial for the AI to understand how to interact with the frontend.
+         * Refactored from template literal to array of strings to avoid IDE parsing issues.
+         */
+        const initialSystemPrompt = {
+            role: 'user',
+            parts: [{ text: [
+                `You are an AI assistant for a personal journaling and goal-tracking website.`,
+                `The user will chat with you to manage their journal entries, goals, to-do lists, and notes.`,
+                `You can create, update, and delete these items, and navigate the user to different sections of the website.`,
+                ``,
+                `**Important Instructions:**`,
+                `1.  **Understand User Intent:** Determine if the user wants to perform an action (create, update, delete, navigate) or simply have a conversation.`,
+                `2.  **Use Action Commands for UI Control:** If the user's intent is to control the website, respond with a specific command format:`,
+                `    \`[ACTION_COMMAND] { "command": "COMMAND_NAME", "param1": "value1", "param2": "value2", ... }\``,
+                `    Immediately after the \`[ACTION_COMMAND]\`, you can provide a natural language response if appropriate (e.g., "Sure, I've created that for you."). The JavaScript will parse the first \`[ACTION_COMMAND]\` it finds.`,
+                `3.  **Available COMMAND_NAMEs and their parameters:**`,
+                ``,
+                `    *   **CREATE_JOURNAL:** Create a new journal entry.`,
+                `        \`{"command": "CREATE_JOURNAL", "title": "string", "content": "string", "mood": "string (e.g., Happy, Sad, Neutral, Excited)", "timestamp": "ISO string (optional, defaults to now)"}\``,
+                `    *   **UPDATE_JOURNAL:** Update an existing journal entry. Requires the \`id\`.`,
+                `        \`{"command": "UPDATE_JOURNAL", "id": "string", "title": "string (optional)", "content": "string (optional)", "mood": "string (optional)"}\``,
+                `    *   **DELETE_JOURNAL:** Delete a journal entry. Requires the \`id\`.`,
+                `        \`{"command": "DELETE_JOURNAL", "id": "string"}\``,
+                ``,
+                `    *   **CREATE_GOAL:** Create a new goal.`,
+                `        \`{"command": "CREATE_GOAL", "title": "string", "description": "string", "targetValue": "number", "dueDate": "ISO string or YYYY-MM-DD (optional)", "progress": "number (0-100, optional, defaults to 0)", "status": "string (e.g., Not Started, On Track, At Risk, Completed, optional)"}\``,
+                `    *   **UPDATE_GOAL:** Update an existing goal. Requires the \`id\`.`,
+                `        \`{"command": "UPDATE_GOAL", "id": "string", "progress": "number (0-100, optional)", "status": "string (e.g., Not Started, On Track, At Risk, Completed, optional)", "notes": "string (optional, for internal use)"}\``,
+                `    *   **DELETE_GOAL:** Delete a goal. Requires the \`id\`.`,
+                `        \`{"command": "DELETE_GOAL", "id": "string"}\``,
+                `        `,
+                `    *   **ADD_TODO:** Add a new to-do item.`,
+                `        \`{"command": "ADD_TODO", "text": "string", "dueDate": "ISO string or YYYY-MM-DD (optional)", "priority": "string (High, Medium, Low, optional, defaults to Low)", "completed": "boolean (optional, defaults to false)"}\``,
+                `    *   **TOGGLE_TODO_COMPLETE:** Mark a to-do as complete or incomplete.`,
+                `        \`{"command": "TOGGLE_TODO_COMPLETE", "id": "string", "completed": "boolean"}\``,
+                `    *   **DELETE_TODO:** Delete a to-do item. Requires the \`id\`.`,
+                `        \`{"command": "DELETE_TODO", "id": "string"}\``,
+                ``,
+                `    *   **ADD_NOTE:** Add a new note.`,
+                `        \`{"command": "ADD_NOTE", "title": "string", "content": "string"}\``,
+                `    *   **UPDATE_NOTE:** Update an existing note. Requires the \`id\`.`,
+                `        \`{"command": "UPDATE_NOTE", "id": "string", "title": "string (optional)", "content": "string (optional)"}\``,
+                `    *   **DELETE_NOTE:** Delete a note. Requires the \`id\`.`,
+                `        \`{"command": "DELETE_NOTE", "id": "string"}\``,
+                ``,
+                `    *   **NAVIGATE_TO:** Navigate the user to a specific section of the website.`,
+                `        \`{"command": "NAVIGATE_TO", "section": "string (journal, goals, todos, notes)"}\``,
+                `    `,
+                `    *   **GET_ALL_RECORDS:** Retrieve all records of a specific type. You can use this to get context and then advise the user or perform follow-up actions.`,
+                `        \`{"command": "GET_ALL_RECORDS", "type": "string (journals, goals, todos, notes)"}\``,
+                `        (Note: The AI will receive the data, but this command itself doesn't directly update the UI with the *list* of records, as that's handled by the rendering functions. It's for the AI to get context.)`,
+                ``,
+                `4.  **Provide IDs when necessary:** When updating or deleting, ensure you explicitly ask the user for or infer the \`id\` of the item they wish to modify. You can ask "Which journal entry do you mean?" or "What's the ID of the goal you want to update?"`,
+                `5.  **Natural Language Fallback:** If the user's input is not an action, respond naturally. If you perform an action, you can also include a brief confirmation or helpful message.`,
+                `6.  **Be helpful and engaging:** Guide the user, suggest features, and help them organize their thoughts.`,
+                `7.  **Current Date Context:** Assume the current date is ${new Date().toISOString().split('T')[0]} unless specified otherwise by the user.`,
+            ].join('\n')}]
+        };
+
+        // Function to execute AI commands received from the chatbot
+        async function executeAICommand(commandString) {
+            const commandRegex = /\[ACTION_COMMAND\]\s*(\{.*\})/s;
+            const match = commandString.match(commandRegex);
+
+            if (match && match[1]) {
+                try {
+                    const commandJson = JSON.parse(match[1]);
+                    console.log('Executing AI command:', commandJson);
+
+                    switch (commandJson.command) {
+                        case 'CREATE_JOURNAL':
+                            await createJournal(commandJson.title, commandJson.content, commandJson.mood);
+                            break;
+                        case 'UPDATE_JOURNAL':
+                            await updateJournal(commandJson.id, commandJson.title, commandJson.content, commandJson.mood);
+                            break;
+                        case 'DELETE_JOURNAL':
+                            await deleteJournal(commandJson.id);
+                            break;
+                        case 'CREATE_GOAL':
+                            await createGoal(commandJson.title, commandJson.description, commandJson.targetValue, commandJson.dueDate, commandJson.progress, commandJson.status);
+                            break;
+                        case 'UPDATE_GOAL':
+                            await updateGoal(commandJson.id, commandJson.progress, commandJson.status, commandJson.notes);
+                            break;
+                        case 'DELETE_GOAL':
+                            await deleteGoal(commandJson.id);
+                            break;
+                        case 'ADD_TODO':
+                            await addTodo(commandJson.text, commandJson.dueDate, commandJson.priority, commandJson.completed);
+                            break;
+                        case 'TOGGLE_TODO_COMPLETE':
+                            await toggleTodoComplete(commandJson.id, commandJson.completed);
+                            break;
+                        case 'DELETE_TODO':
+                            await deleteTodo(commandJson.id);
+                            break;
+                        case 'ADD_NOTE':
+                            await addNote(commandJson.title, commandJson.content);
+                            break;
+                        case 'UPDATE_NOTE':
+                            await updateNote(commandJson.id, commandJson.title, commandJson.content);
+                            break;
+                        case 'DELETE_NOTE':
+                            await deleteNote(commandJson.id);
+                            break;
+                        case 'NAVIGATE_TO':
+                            navigateToSection(commandJson.section);
+                            break;
+                        case 'GET_ALL_RECORDS':
+                            // AI requests records for context, no direct UI update
+                            const records = await getRecords(commandJson.type);
+                            // The AI would ideally be able to process this and provide a response.
+                            // For client-side AI, this is tricky. We can just log it or give a generic success.
+                            console.log(`AI retrieved all ${commandJson.type} records:`, records);
+                            break;
+                        default:
+                            showChatError(`Unknown AI command: ${commandJson.command}`, 'error');
+                            break;
+                    }
+                    // Remove the action command from the response for display
+                    return commandString.replace(commandRegex, '').trim();
+                } catch (e) {
+                    console.error('Error parsing or executing AI command:', e);
+                    showChatError(`AI issued a malformed command or encountered an error: ${e.message}`, 'error');
+                    return commandString; // Return original string if error
+                }
+            }
+            return commandString; // No action command found, return original string
+        }
+
+        // Helper function to update a Lucide icon displayed within a button.
+        function updateButtonIcon(buttonElement, newIconName, classList = 'w-4 h-4') {
+            let currentIconSvg = buttonElement.querySelector('.lucide');
+            if (currentIconSvg) {
+                currentIconSvg.remove();
+            }
+            const newIconSpan = document.createElement('span');
+            newIconSpan.setAttribute('data-lucide', newIconName);
+            newIconSpan.className = classList;
+            buttonElement.appendChild(newIconSpan);
+            createIcons();
+        }
+
+        /**
+         * Displays a chat-specific error message.
+         * @param {string} message The error message to display.
+         * @param {string} type 'error' (default) or 'success'.
+         */
+        function showChatError(message, type = 'error') {
+            chatErrorText.textContent = message;
+            const iconPlaceholder = chatErrorMessageDiv.querySelector('.icon-placeholder');
+
+            // Reset classes
+            chatErrorMessageDiv.classList.remove('hidden', 'bg-red-100', 'border-red-200', 'text-red-700', 'dark:bg-red-950', 'dark:border-red-700', 'dark:text-red-300', 'bg-green-100', 'border-green-200', 'text-green-700', 'dark:bg-green-950', 'dark:border-green-700', 'dark:text-green-300');
+            chatErrorMessageDiv.classList.add('flex'); // Explicitly add flex to make it visible
+
+            if (type === 'success') {
+                chatErrorMessageDiv.classList.add('bg-green-100', 'border-green-200', 'text-green-700', 'dark:bg-green-950', 'dark:border-green-700', 'dark:text-green-300');
+                updateButtonIcon(iconPlaceholder, 'check-circle', 'w-5 h-5 flex-shrink-0');
+            } else {
+                chatErrorMessageDiv.classList.add('bg-red-100', 'border-red-200', 'text-red-700', 'dark:bg-red-950', 'dark:border-red-700', 'dark:text-red-300');
+                updateButtonIcon(iconPlaceholder, 'alert-circle', 'w-5 h-5 flex-shrink-0');
+            }
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                chatErrorMessageDiv.classList.add('hidden');
+                chatErrorMessageDiv.classList.remove('flex'); // Explicitly remove flex when hiding
+                chatErrorText.textContent = '';
+                // Restore generic icon placeholder if needed (or just leave it empty)
+                iconPlaceholder.innerHTML = ''; 
+            }, 5000);
+        }
+
+        const chatbotRenderer = {
+            code(code, lang) {
+                let actualCodeContent = String(code); // Ensure it's a string
+                const languageDisplay = lang ? `<span class="text-xs font-semibold uppercase text-gray-400">${lang}</span>` : '';
+                const uniqueId = `code-block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                
+                const escapedCode = actualCodeContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+                return `
+                    <div class="code-block-container">
+                        <div class="code-block-header">
+                            ${languageDisplay}
+                            <button class="code-block-copy-button" data-copy-target="${uniqueId}">
+                                <span data-lucide="clipboard" class="w-4 h-4"></span>
+                                Copy code
+                            </button>
+                        </div>
+                        <pre><code id="${uniqueId}">${escapedCode}</code></pre>
+                    </div>
+                `;
+            }
+        };
+        marked.use({ renderer: chatbotRenderer });
+
+        // Function to append a message to the chatbot history
+        function appendChatbotMessage(role, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', role);
+            
+            const messageId = `chatbot-msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            messageDiv.dataset.messageId = messageId;
+            
+            let contentHTML = '';
+            if (role === 'user') {
+                contentHTML = text;
+            } else { // AI message
+                contentHTML = `<div class="message-content">${marked.parse(text)}</div>`;
+            }
+            chatbotMessageTextCache.set(messageId, text); 
+
+            const actionsHTML = `
+                <div class="message-actions">
+                    <button class="copy-message-btn" title="Copy message" data-message-id="${messageId}">
+                        <span data-lucide="clipboard" class="w-4 h-4"></span>
+                    </button>
+                    <button class="dictate-message-btn" title="Dictate message" data-message-id="${messageId}">
+                        <span data-lucide="volume-2" class="w-4 h-4"></span>
+                    </button>
+                </div>
+            `;
+            
+            messageDiv.innerHTML = contentHTML + actionsHTML;
+            chatbotChatHistoryDiv.appendChild(messageDiv);
+            
+            setTimeout(() => { messageDiv.style.transform = 'scale(1)'; }, 10);
+            chatbotChatHistoryDiv.scrollTop = chatbotChatHistoryDiv.scrollHeight;
+            createIcons();
+        }
+        
+        // --- CHATBOT EVENT LISTENERS ---
+        floatingChatbotBtn.addEventListener('click', () => {
+            floatingChatbotContainer.classList.add('open');
+            chatbotChatInput.focus();
+        });
+
+        chatbotCloseBtn.addEventListener('click', () => {
+            floatingChatbotContainer.classList.remove('open');
+            if (isVoiceInputActive && recognition) {
+                recognition.stop();
+            }
+            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+                window.speechSynthesis.cancel();
+            }
+        });
+
+        chatbotSendBtn.addEventListener('click', async () => {
+            const userMessage = chatbotChatInput.value.trim();
+            if (!userMessage) {
+                return;
+            }
+            
+            if (isVoiceInputActive && recognition) {
+                recognition.stop();
+            }
+            chatbotActionsDropdown.classList.add('hidden');
+            chatErrorMessageDiv.classList.add('hidden');
+            chatErrorMessageDiv.classList.remove('flex');
+
+            chatbotChatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
+            appendChatbotMessage('user', userMessage);
+            
+            chatbotChatInput.value = '';
+            chatbotSendBtn.disabled = true;
+            
+            const loadingMessage = document.createElement('div');
+            loadingMessage.id = 'chat-loading';
+            loadingMessage.classList.add('p-4', 'text-center', 'text-gray-500', 'text-sm');
+            loadingMessage.innerHTML = `
+                <div class="loader-container h-8">
+                    <div class="loader-dot"></div>
+                    <div class="loader-dot"></div>
+                    <div class="loader-dot"></div>
+                </div>
+                <span class="mt-2 block">AI is typing...</span>
+            `;
+            chatbotChatHistoryDiv.appendChild(loadingMessage);
+            chatbotChatHistoryDiv.scrollTop = chatbotChatHistoryDiv.scrollHeight;
+            
+            try {
+                const payload = { contents: chatbotChatHistory };
+                const responseText = await callGeminiAPI(payload);
+                
+                const finalResponse = await executeAICommand(responseText); // Execute commands and get cleaned response
+                chatbotChatHistory.push({ role: 'model', parts: [{ text: finalResponse }] });
+                appendChatbotMessage('ai', finalResponse);
+                await saveChatHistory(); // Save chat history after each exchange
+                
+            } catch (error) {
+                console.error('Chat API call failed:', error);
+                showChatError(`An error occurred in the chat: ${error.message}`, 'error');
+                // Add an error message to chat history too for context
+                chatbotChatHistory.push({ role: 'model', parts: [{ text: `Error: ${error.message}` }] });
+            } finally {
+                chatbotSendBtn.disabled = false;
+                const loadingDiv = document.getElementById('chat-loading');
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                }
+                chatbotChatInput.focus();
+            }
+        });
+        
+        chatbotChatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                chatbotSendBtn.click();
+            }
+        });
+
+        // Event delegation for copy code buttons within chat history
+        chatbotChatHistoryDiv.addEventListener('click', (event) => {
+            const codeCopyButton = event.target.closest('.code-block-copy-button');
+            if (codeCopyButton) {
+                const targetId = codeCopyButton.dataset.copyTarget;
+                const codeElement = document.getElementById(targetId);
+                if (codeElement) {
+                    const codeToCopy = codeElement.textContent;
+                    updateButtonIcon(codeCopyButton, 'check', 'w-4 h-4');
+                    copyToClipboard(codeToCopy); 
+                    setTimeout(() => { updateButtonIcon(codeCopyButton, 'clipboard', 'w-4 h-4'); }, 2000);
+                    return;
+                }
+            }
+
+            const chatCopyButton = event.target.closest('.copy-message-btn');
+            if (chatCopyButton) {
+                const messageId = chatCopyButton.dataset.messageId;
+                const messageContent = chatbotMessageTextCache.get(messageId);
+                if (messageContent) {
+                    updateButtonIcon(chatCopyButton, 'check');
+                    copyToClipboard(messageContent); 
+                    setTimeout(() => { updateButtonIcon(chatCopyButton, 'clipboard'); }, 2000);
+                } else {
+                    showChatError('Message content not found for copying.', 'error');
+                }
+                return;
+            }
+
+            const dictateButton = event.target.closest('.dictate-message-btn');
+            if (dictateButton) {
+                const messageId = dictateButton.dataset.messageId;
+                const messageContent = chatbotMessageTextCache.get(messageId);
+                if (messageContent) {
+                    toggleSpeech(messageContent, dictateButton);
+                } else {
+                    showChatError('Message content not found for dictation.', 'error');
+                }
+                return;
+            }
+        });
+
+        // Speech Recognition for chatbot
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isVoiceInputActive = true;
+                chatbotVoiceInputBtn.classList.add('voice-input-active');
+                updateButtonIcon(chatbotVoiceInputBtn, 'mic-off', 'w-5 h-5');
+                chatbotChatInput.placeholder = 'Listening... Speak now.';
+                finalTranscript = '';
+                chatbotChatInput.value = '';
+                chatbotActionsDropdown.classList.add('hidden');
+                chatErrorMessageDiv.classList.add('hidden');
+                chatErrorMessageDiv.classList.remove('flex');
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                chatbotChatInput.value = finalTranscript + interimTranscript;
+                chatbotChatInput.scrollLeft = chatbotChatInput.scrollWidth;
+            };
+
+            recognition.onend = () => {
+                isVoiceInputActive = false;
+                chatbotVoiceInputBtn.classList.remove('voice-input-active');
+                updateButtonIcon(chatbotVoiceInputBtn, 'mic', 'w-5 h-5');
+                chatbotChatInput.placeholder = 'Ask AI to manage your journal...';
+
+                if (finalTranscript.trim() !== '') {
+                    chatbotChatInput.value = finalTranscript.trim();
+                } else if (chatbotChatInput.value.trim() === '') {
+                    chatbotChatInput.value = ''; 
+                }
+            };
+
+            recognition.onerror = (event) => {
+                isVoiceInputActive = false;
+                chatbotVoiceInputBtn.classList.remove('voice-input-active');
+                updateButtonIcon(chatbotVoiceInputBtn, 'mic', 'w-5 h-5');
+                chatbotChatInput.placeholder = 'Ask AI to manage your journal...';
+                chatbotActionsDropdown.classList.add('hidden');
+
+                console.error('Speech recognition error:', event.error);
+                let errorMessage = `Speech recognition error: ${event.error}`;
+                if (event.error === 'not-allowed') {
+                    errorMessage = 'Microphone access denied. Please allow microphone access in your browser settings.';
+                } else if (event.error === 'no-speech') {
+                    console.log('No speech detected, recognition ended.');
+                    if (finalTranscript.trim() === '') {
+                        chatbotChatInput.value = '';
+                    }
+                } else if (event.error === 'network') {
+                    errorMessage = 'Speech recognition network error. Check internet connection.';
+                }
+                showChatError(errorMessage, 'error'); // Explicitly pass type
+            };
+        } else {
+            console.warn('Web Speech API (SpeechRecognition) not supported in this browser. Voice input button will be hidden.');
+            chatbotVoiceInputBtn.style.display = 'none';
+        }
+
+        chatbotVoiceInputBtn.addEventListener('click', () => {
+            if (recognition) {
+                if (isVoiceInputActive) {
+                    recognition.stop();
+                } else {
+                    finalTranscript = '';
+                    recognition.start();
+                }
+            } else {
+                showChatError('Speech recognition is not supported in this browser.', 'error'); // Explicitly pass type
+            }
+        });
+
+        chatbotAddAttachmentBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            chatbotActionsDropdown.classList.toggle('hidden');
+            createIcons();
+        });
+
+        // Global document click listener for dropdowns (excluding modals)
+        document.addEventListener('click', (event) => {
+            // Close chatbot dropdown
+            if (!chatbotActionsDropdown.contains(event.target) && !chatbotAddAttachmentBtn.contains(event.target)) {
+                chatbotActionsDropdown.classList.add('hidden');
+            }
+            // Close theme dropdown
+            if (!themeDropdown.contains(event.target) && !themeSelectorBtn.contains(event.target)) {
+                themeDropdown.classList.add('hidden');
+            }
+            // IMPORTANT: User switcher modal closing logic moved to the modal itself for better reliability.
+            // This global listener should NOT try to close the modal.
+        });
+
+        // Helper function to copy text to clipboard
+        function copyToClipboard(text) { 
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        console.log('Text copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        showChatError('Failed to copy text. Please copy manually.', 'error'); // Explicitly pass type
+                    });
+            } else {
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = text;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Failed to copy (fallback):', err);
+                    showChatError('Failed to copy text. Please copy manually.', 'error'); // Explicitly pass type
+                }
+                document.body.removeChild(tempTextArea);
+            }
+        }
+
+        // Helper function for text-to-speech
+        function toggleSpeech(text, buttonElement) {
+            if (!window.speechSynthesis) {
+                showChatError('Speech synthesis not supported in this browser.', 'error'); // Explicitly pass type
+                return;
+            }
+
+            if (chatbotIsSpeaking && chatbotCurrentUtterance && chatbotCurrentUtterance.text === text) {
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                    updateButtonIcon(buttonElement, 'pause');
+                } else {
+                    window.speechSynthesis.pause();
+                    updateButtonIcon(buttonElement, 'volume-2');
+                }
+            } else {
+                startSpeech(text, buttonElement);
+            }
+        }
+
+        function startSpeech(text, buttonElement) {
+            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+                window.speechSynthesis.cancel();
+            }
+
+            document.querySelectorAll('.dictate-message-btn').forEach(btn => {
+                if (btn !== buttonElement) {
+                    updateButtonIcon(btn, 'volume-2'); 
+                }
+            });
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+
+            utterance.onstart = () => {
+                chatbotIsSpeaking = true;
+                chatbotCurrentUtterance = utterance;
+                updateButtonIcon(buttonElement, 'pause');
+            };
+            utterance.onend = () => {
+                chatbotIsSpeaking = false;
+                chatbotCurrentUtterance = null;
+                updateButtonIcon(buttonElement, 'volume-2');
+            };
+            utterance.onerror = (event) => {
+                console.error('Speech synthesis error:', event.error);
+                showChatError('Failed to dictate message. Check console for details.', 'error'); // Explicitly pass type
+                chatbotIsSpeaking = false;
+                chatbotCurrentUtterance = null;
+                updateButtonIcon(buttonElement, 'volume-2');
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Generic API call function with exponential backoff
+        async function callGeminiAPI(payload) {
+            if (GEMINI_API_KEY === "" || !GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") { 
+                throw new Error("API Key is not set or is the default placeholder. Please replace 'YOUR_GEMINI_API_KEY_HERE' in the script with your actual Gemini API key.");
+            }
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
+
+            let response;
+            let result;
+            let success = false;
+            let retryCount = 0;
+            const maxRetries = 3;
+            let delay = 1000;
+
+            while (retryCount < maxRetries && !success) {
+                try {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429) {
+                        if (retryCount < maxRetries - 1) {
+                            console.warn(`API rate limit exceeded. Retrying in ${delay / 1000}s...`);
+                            await new Promise(res => setTimeout(res, delay));
+                            delay *= 2;
+                            retryCount++;
+                        } else {
+                            throw new Error('API rate limit exceeded. Please try again later.');
+                        }
+                    } else if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API error: ${response.status} ${response.statusText} - ${errorData.error?.message || 'Unknown error'}`);
+                    } else {
+                        result = await response.json();
+                        success = true;
+                    }
+                } catch (err) {
+                    if (retryCount < maxRetries - 1) {
+                        console.warn(`Fetch error: ${err.message}. Retrying in ${delay / 1000}s...`);
+                        await new Promise(res => setTimeout(res, delay));
+                        delay *= 2;
+                        retryCount++;
+                    } else {
+                        throw err;
+                    }
+                }
+            }
+            
+            if (result && result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                return result.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error('Failed to get a valid response from the AI. No candidates found or content is empty.');
+            }
+        }
+
+        async function loadChatHistory() {
+            try {
+                const history = await getRecords('chat_history');
+                // Ensure initialSystemPrompt is always the first in chatbotChatHistory
+                chatbotChatHistory = [initialSystemPrompt, ...history.map(item => ({ role: item.role, parts: item.parts }))];
+                chatbotChatHistoryDiv.innerHTML = '';
+                // Only keep last 20 messages for display to prevent overflow
+                chatbotChatHistory.slice(1) // Exclude initial system prompt from display
+                                 .slice(-20) // Get last 20 of actual conversation
+                                 .forEach(msg => appendChatbotMessage(msg.role, msg.parts[0].text));
+            } catch (error) {
+                console.error('Failed to load chat history:', error);
+                chatbotChatHistory = [initialSystemPrompt]; // Start with system prompt if loading fails
+            }
+        }
+
+        async function saveChatHistory() {
+            // Save only the current user's chat history
+            // Remove the system prompt before saving, as it's static and re-added on load
+            const cleanHistory = chatbotChatHistory.filter(msg => msg !== initialSystemPrompt)
+                .map((msg, index) => ({ id: `chat_${index}`, role: msg.role, parts: msg.parts, userId: currentUserId }));
+            
+            // To prevent massive history, cap it at a reasonable number (e.g., 50 last messages)
+            const historyToSave = cleanHistory.slice(-50); 
+            
+            // Clear existing history for this user first
+            const transaction = db.transaction('chat_history', 'readwrite');
+            const store = transaction.objectStore('chat_history');
+            
+            // Use a cursor to delete records only for the current user
+            const deleteRequest = store.openCursor();
+            deleteRequest.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value.userId === currentUserId) {
+                        cursor.delete();
+                    }
+                    cursor.continue();
+                } else {
+                    // Once all old records for this user are deleted, add new ones
+                    historyToSave.forEach(msg => store.put(msg));
+                    console.log('Chat history saved.');
+                }
+            };
+            transaction.onerror = (event) => console.error('Failed to save chat history:', event.target.error);
+        }
+
+        // --- NEW CHAT FUNCTIONALITY ---
+        async function startNewChat(playGreetingSound = true) {
+            chatbotChatHistory = [initialSystemPrompt]; // Reset conversation history to system prompt
+            chatbotChatHistoryDiv.innerHTML = ''; // Clear UI messages
+            chatbotChatInput.value = ''; // Clear input field
+            chatbotMessageTextCache.clear(); // Clear cached message content
+            chatErrorMessageDiv.classList.add('hidden'); // Hide any errors
+            chatErrorMessageDiv.classList.remove('flex');
+
+            const greetingMessage = 'Hello! I am your AI Journal assistant. How can I help you manage your journals, goals, to-dos, and notes today?';
+            chatbotChatHistory.push({ role: 'model', parts: [{ text: greetingMessage }] });
+            appendChatbotMessage('ai', greetingMessage);
+            chatbotChatInput.focus();
+            await saveChatHistory(); // Save new chat start
+
+            if (playGreetingSound && window.speechSynthesis) {
+                const utterance = new SpeechSynthesisUtterance(greetingMessage);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Event listener for the "New Chat" button
+        newChatBtn.addEventListener('click', () => startNewChat());
+
+        // --- USER SWITCHER MODAL LOGIC ---
+        async function renderUserList() {
+            userListDiv.innerHTML = '<p class="text-sm text-gray-500 mb-2">Select a user or create new:</p>';
+            const users = await getAllUsers();
+            if (users.length === 0) {
+                 userListDiv.innerHTML += '<p class="text-gray-500 text-sm">No users yet. Create one!</p>';
+            }
+            users.forEach(user => {
+                const userButton = document.createElement('button');
+                userButton.innerHTML = `<span data-lucide="user-round" class="w-5 h-5"></span> ${user.name}`;
+                userButton.dataset.id = user.id;
+                userButton.classList.toggle('active', user.id === currentUserId);
+                userButton.addEventListener('click', () => switchUser(user.id, user.name));
+                userListDiv.appendChild(userButton);
+            });
+            createIcons(); // Render icons on user buttons
+        }
+
+        async function switchUser(userId, userName) {
+            currentUserId = userId;
+            currentUserName = userName;
+            localStorage.setItem('currentUserId', userId);
+            localStorage.setItem('currentUserName', userName);
+            currentUsernameText.textContent = userName;
+            userSwitcherModal.classList.add('hidden'); // Hide modal after switching
+            await loadUserData(); // Reload all data for the new user
+            startNewChat(false); // Start a new chat session for the new user without greeting sound
+            showChatError(`Switched to user: ${userName}`, 'success');
+        }
+
+        createUserBtn.addEventListener('click', async () => {
+            const newName = newUsernameInput.value.trim();
+            if (newName) {
+                const newId = `user_${Date.now()}`;
+                const newUser = { id: newId, name: newName, createdAt: new Date().toISOString() };
+                await saveUser(newUser);
+                newUsernameInput.value = '';
+                await renderUserList(); // Refresh list immediately after creating
+                await switchUser(newId, newName); // Automatically switch to the new user
+            } else {
+                showChatError('Please enter a username.', 'error');
+            }
+        });
+
+        switchUserBtn.addEventListener('click', async (event) => {
+            event.stopPropagation(); // Prevent this click from bubbling up to the modal backdrop
+            currentUsernameText.textContent = currentUserName;
+            userSwitcherModal.classList.toggle('hidden');
+            if (!userSwitcherModal.classList.contains('hidden')) { // If it's now open
+                await renderUserList();
+            }
+        });
+
+        // NEW: Listener for clicking on the modal backdrop to close it
+        userSwitcherModal.addEventListener('click', (event) => {
+            // Check if the click was directly on the modal's background overlay, not its content
+            if (event.target === userSwitcherModal) {
+                userSwitcherModal.classList.add('hidden');
+            }
+        });
+
+        // --- INITIALIZATION ---
+        async function loadUserData() {
+            console.log(`Loading data for user: ${currentUserName} (ID: ${currentUserId})`);
+            await renderJournals();
+            await renderGoals();
+            await renderTodos();
+            await renderNotes();
+            await loadChatHistory(); // Load chat history for the current user
+        }
+
+        window.addEventListener('load', async () => {
+            await openDB();
+
+            // Ensure 'users' object store has at least a default user
+            const existingUsers = await getAllUsers();
+            if (existingUsers.length === 0) {
+                const defaultUser = { id: 'default-user', name: 'Default User', createdAt: new Date().toISOString() };
+                await saveUser(defaultUser);
+                await switchUser('default-user', 'Default User'); // Set default user
+            } else {
+                // If there are users, ensure currentUserId is valid
+                const userExists = existingUsers.some(user => user.id === currentUserId);
+                if (!userExists) {
+                    // Fallback to first user if currentUserId is somehow invalid
+                    await switchUser(existingUsers[0].id, existingUsers[0].name);
+                } else {
+                    // Update currentUserName in case it's mismatched or not fully set
+                    const matchedUser = existingUsers.find(user => user.id === currentUserId);
+                    if (matchedUser && matchedUser.name !== currentUserName) {
+                         currentUserName = matchedUser.name;
+                         localStorage.setItem('currentUserName', currentUserName);
+                    }
+                }
+            }
+            currentUsernameText.textContent = currentUserName; // Set initial display
+
+            // Initialize theme and dark mode
+            const savedTheme = localStorage.getItem('selected-theme') || 'default';
+            applyTheme(savedTheme);
+            const isDarkMode = localStorage.getItem('dark-mode') !== 'false';
+            darkModeToggle.checked = isDarkMode;
+            applyDarkMode(isDarkMode);
+
+            createIcons();
+
+            // Load all user data
+            await loadUserData();
+
+            // Start a new AI chat conversation
+            startNewChat(false); // Don't play greeting sound on initial load
+
+            // Set initial active navigation button and display its content
+            navigateToSection('journal');
+        });
+
+        // Event listeners for theme and dark mode
+        darkModeToggle.addEventListener('change', () => {
+            applyDarkMode(darkModeToggle.checked);
+        });
+
+        themeSelectorBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            themeDropdown.classList.toggle('hidden');
+            createIcons();
+        });
+
+        themeOptions.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const themeName = event.currentTarget.dataset.theme;
+                applyTheme(themeName);
+                themeDropdown.classList.add('hidden');
+            });
+        });
+
+        // Navigation button listeners
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                navigateToSection(button.dataset.section);
+            });
+        });
+
+    </script>
+</body>
+</html>
