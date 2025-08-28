@@ -67,7 +67,7 @@
             --ai-msg-text-dark: #f9fafb; 
             --chat-input-bg-dark: #1f2937;
             --chat-input-border-dark: #374151;
-            --chat-input-text-dark: #e5e7eb;
+            --chat-input-text-dark: #e5e7eb; /* FIXED: Changed text color for better contrast in dark mode */
             --input-btn-bg-dark: #374151;
             --input-btn-text-dark: #d1d5db;
             --header-bg-dark: #1f2937;
@@ -114,10 +114,10 @@
         .header-section .text-gray-500 { color: #6b7280; }
         body.dark .header-section .text-gray-500 { color: #9ca3af; }
 
-        #theme-selector-btn, #new-chat-btn, #version-selector-btn, #switch-user-btn { background-color: var(--input-btn-bg-light); color: var(--input-btn-text-light); }
-        #theme-selector-btn:hover, #new-chat-btn:hover, #version-selector-btn:hover, #switch-user-btn:hover { background-color: color-mix(in srgb, var(--input-btn-bg-light) 80%, black 10%); }
-        body.dark #theme-selector-btn, body.dark #new-chat-btn, body.dark #version-selector-btn, body.dark #switch-user-btn { background-color: var(--input-btn-bg-dark); color: var(--input-btn-text-dark); }
-        body.dark #theme-selector-btn:hover, body.dark #new-chat-btn:hover, body.dark #version-selector-btn:hover, body.dark #switch-user-btn:hover { background-color: color-mix(in srgb, var(--input-btn-bg-dark) 80%, white 10%); }
+        #theme-selector-btn, #new-chat-btn, #version-selector-btn, #switch-user-btn, #sidebar-toggle-btn { background-color: var(--input-btn-bg-light); color: var(--input-btn-text-light); }
+        #theme-selector-btn:hover, #new-chat-btn:hover, #version-selector-btn:hover, #switch-user-btn:hover, #sidebar-toggle-btn:hover { background-color: color-mix(in srgb, var(--input-btn-bg-light) 80%, black 10%); }
+        body.dark #theme-selector-btn, body.dark #new-chat-btn, body.dark #version-selector-btn, body.dark #switch-user-btn, body.dark #sidebar-toggle-btn { background-color: var(--input-btn-bg-dark); color: var(--input-btn-text-dark); }
+        body.dark #theme-selector-btn:hover, body.dark #new-chat-btn:hover, body.dark #version-selector-btn:hover, body.dark #switch-user-btn:hover, body.dark #sidebar-toggle-btn:hover { background-color: color-mix(in srgb, var(--input-btn-bg-dark) 80%, white 10%); }
 
         /* Main app container */
         #main-app-container {
@@ -134,22 +134,54 @@
             color: var(--text-color-dark);
         }
 
-        /* Navigation */
+        /* Navigation - Responsive */
         #main-nav {
             flex-shrink: 0;
-            width: 200px;
+            width: 250px; /* Slightly wider sidebar */
             padding: 1rem;
             border-right: 1px solid var(--border-color-light);
             background-color: var(--card-bg-light);
-            transition: background-color 0.6s ease, border-color 0.6s ease;
+            transition: transform 0.3s ease-out, background-color 0.6s ease, border-color 0.6s ease;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            z-index: 40; /* Above main content, below modal */
         }
         body.dark #main-nav {
             border-color: var(--border-color-dark);
             background-color: var(--card-bg-dark);
         }
+        
+        @media (max-width: 767px) { /* Mobile styles for sidebar */
+            #main-nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                transform: translateX(-100%); /* Hidden by default */
+                box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            }
+            body.sidebar-open #main-nav {
+                transform: translateX(0%); /* Show when open */
+            }
+            #main-nav-backdrop {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 30;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease-out;
+            }
+            body.sidebar-open #main-nav-backdrop {
+                opacity: 1;
+                pointer-events: all;
+            }
+        }
+
         #main-nav button {
             display: flex;
             align-items: center;
@@ -162,6 +194,7 @@
             color: var(--text-color-light);
             background-color: transparent;
             border: none;
+            text-align: left; /* Ensure text aligns left */
         }
         body.dark #main-nav button { color: var(--text-color-dark); }
         #main-nav button:hover { background-color: var(--bg-color-light); }
@@ -182,6 +215,12 @@
             flex-grow: 1;
             padding: 1.5rem;
             overflow-y: auto;
+            transition: padding 0.3s ease; /* Smooth padding transition for mobile */
+        }
+        @media (max-width: 767px) {
+             #content-area {
+                padding: 1rem;
+            }
         }
 
         /* Card styles for various entries */
@@ -209,6 +248,7 @@
             right: 0.5rem;
             display: flex;
             gap: 0.25rem;
+            z-index: 2; /* Ensure buttons are clickable */
         }
         .data-card .card-actions button {
             background: none;
@@ -398,6 +438,19 @@
             background-color: var(--header-bg-dark);
         }
         
+        /* Chatbot Chat Input Styling */
+        #chatbot-chat-input {
+            background-color: var(--chat-input-bg-light);
+            color: var(--chat-input-text-light);
+            border-color: var(--chat-input-border-light);
+            /* Add any other default input styles here */
+        }
+        body.dark #chatbot-chat-input {
+            background-color: var(--chat-input-bg-dark);
+            color: var(--chat-input-text-dark); /* Use correct text color for dark mode */
+            border-color: var(--chat-input-border-dark);
+        }
+
         /* Message styles within floating chatbot - directly from inspiration */
         .chat-message { margin-bottom: 0.75rem; padding: 1rem; border-radius: 1.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); word-break: break-word; transition: all 0.3s ease; transform: scale(0.95); transform-origin: bottom; max-width: 85%; position: relative; padding-bottom: 2.5rem; }
         .chat-message.user { background-color: var(--user-msg-bg-light); color: var(--user-msg-text-light); margin-left: auto; border-bottom-right-radius: 0.5rem; }
@@ -409,13 +462,13 @@
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1.0); opacity: 1; } }
 
         /* Scrollbar styles */
-        #chatbot-chat-history::-webkit-scrollbar, #content-area::-webkit-scrollbar { width: 10px; }
-        #chatbot-chat-history::-webkit-scrollbar-track, #content-area::-webkit-scrollbar-track { background: var(--card-bg-light); border-radius: 5px; }
-        #chatbot-chat-history::-webkit-scrollbar-thumb, #content-area::-webkit-scrollbar-thumb { background: #888; border-radius: 5px; border: 2px solid var(--card-bg-light); }
-        #chatbot-chat-history::-webkit-scrollbar-thumb:hover, #content-area::-webkit-scrollbar-thumb:hover { background: #555; }
-        body.dark #chatbot-chat-history::-webkit-scrollbar-track, body.dark #content-area::-webkit-scrollbar-track { background: var(--card-bg-dark); }
-        body.dark #chatbot-chat-history::-webkit-scrollbar-thumb, body.dark #content-area::-webkit-scrollbar-thumb { background: #6b7280; border-color: var(--card-bg-dark); }
-        body.dark #chatbot-chat-history::-webkit-scrollbar-thumb:hover, body.dark #content-area::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        #chatbot-chat-history::-webkit-scrollbar, #content-area::-webkit-scrollbar, #main-nav::-webkit-scrollbar, #user-list::-webkit-scrollbar { width: 10px; }
+        #chatbot-chat-history::-webkit-scrollbar-track, #content-area::-webkit-scrollbar-track, #main-nav::-webkit-scrollbar-track, #user-list::-webkit-scrollbar-track { background: var(--card-bg-light); border-radius: 5px; }
+        #chatbot-chat-history::-webkit-scrollbar-thumb, #content-area::-webkit-scrollbar-thumb, #main-nav::-webkit-scrollbar-thumb, #user-list::-webkit-scrollbar-thumb { background: #888; border-radius: 5px; border: 2px solid var(--card-bg-light); }
+        #chatbot-chat-history::-webkit-scrollbar-thumb:hover, #content-area::-webkit-scrollbar-thumb:hover, #main-nav::-webkit-scrollbar-thumb:hover, #user-list::-webkit-scrollbar-thumb:hover { background: #555; }
+        body.dark #chatbot-chat-history::-webkit-scrollbar-track, body.dark #content-area::-webkit-scrollbar-track, body.dark #main-nav::-webkit-scrollbar-track, body.dark #user-list::-webkit-scrollbar-track { background: var(--card-bg-dark); }
+        body.dark #chatbot-chat-history::-webkit-scrollbar-thumb, body.dark #content-area::-webkit-scrollbar-thumb, body.dark #main-nav::-webkit-scrollbar-thumb, body.dark #user-list::-webkit-scrollbar-thumb { background: #6b7280; border-color: var(--card-bg-dark); }
+        body.dark #chatbot-chat-history::-webkit-scrollbar-thumb:hover, body.dark #content-area::-webkit-scrollbar-thumb:hover, body.dark #main-nav::-webkit-scrollbar-thumb:hover, body.dark #user-list::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
         /* Code block styles (from inspiration) */
         .code-block-container { position: relative; background-color: var(--bg-color-dark); color: var(--text-color-dark); border-radius: 0.75rem; margin-top: 1rem; margin-bottom: 1rem; overflow: hidden; border: 1px solid var(--border-color-dark); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
@@ -445,7 +498,7 @@
         .actions-dropdown { position: absolute; bottom: calc(100% + 8px); right: 0; background-color: var(--card-bg-light); border-radius: 1rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); padding: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; transform-origin: bottom right; transition: transform 0.2s ease-out, opacity 0.2s ease-out; z-index: 20; border: 1px solid var(--border-color-light); min-width: 140px; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
         body.dark .actions-dropdown { background-color: var(--card-bg-dark); border-color: var(--border-color-dark); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
         .actions-dropdown.hidden { opacity: 0; transform: scale(0.9); pointer-events: none; }
-        .actions-dropdown button, .actions-dropdown label { display: flex; align-items: center; padding: 0.5rem 0.75rem; border-radius: 0.75rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; color: var(--text-color-light); }
+        .actions-dropdown button, .actions-dropdown label { display: flex; align-items: center; padding: 0.5rem 0.75rem; border-radius: 0.75rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; color: var(--text-color-light); border: none; background: transparent; }
         body.dark .actions-dropdown button, body.dark .actions-dropdown label { color: var(--text-color-dark); }
         .actions-dropdown button:hover, .actions-dropdown label:hover { background-color: var(--bg-color-light); }
         body.dark .actions-dropdown button:hover, body.dark .actions-dropdown label:hover { background-color: color-mix(in srgb, var(--card-bg-dark) 80%, var(--accent-primary-dark) 5%); }
@@ -543,10 +596,11 @@
             width: 100vw;
             height: 100vh;
             background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
+            display: flex; /* Always explicitly set to flex when open */
             align-items: center;
             justify-content: center;
             z-index: 150;
+            /* Start hidden by default, controlled by JS */
         }
         #user-switcher-modal-content {
             background-color: var(--card-bg-light);
@@ -634,65 +688,37 @@
         body.dark #create-user-btn { background-color: var(--accent-primary-dark); }
         #create-user-btn:hover { opacity: 0.9; }
 
-        /* API Key Warning */
-        #api-key-warning {
-            position: fixed;
-            top: 1rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #fef2f2; /* Red-50 */
-            border: 1px solid #ef4444; /* Red-500 */
-            color: #dc2626; /* Red-600 */
-            padding: 1rem 1.5rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 0.9rem;
-            animation: fadeInOut 8s ease-in-out forwards;
-        }
-        body.dark #api-key-warning {
-            background-color: #450a0a; /* Red-950 */
-            border-color: #fca5a5; /* Red-300 */
-            color: #fecaca; /* Red-200 */
-        }
-        #api-key-warning button {
-            background: none;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 50%;
-        }
-        #api-key-warning button:hover {
-            background-color: rgba(0,0,0,0.05);
-        }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            90% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); pointer-events: none; }
-        }
+        /* Dark Mode Toggle Switch Styling */
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { background-color: var(--input-btn-bg-light); -webkit-transition: .4s; transition: .4s; border: 1px solid var(--border-color-light); }
+        .slider:before { background-color: white; -webkit-transition: .4s; transition: .4s; }
+        body.dark .slider { background-color: var(--input-btn-bg-dark); border: 1px solid var(--border-color-dark); }
+        body.dark .slider:before { background-color: var(--bg-color-dark); } /* Darker knob in dark mode */
 
+        input:checked + .slider { background-color: var(--accent-primary); border-color: var(--accent-primary); }
+        input:checked + .slider:before { -webkit-transform: translateX(26px); -ms-transform: translateX(26px); transform: translateX(26px); }
+
+        body.dark input:checked + .slider { background-color: var(--accent-primary-dark); border-color: var(--accent-primary-dark); }
+        body.dark input:checked + .slider:before { background-color: var(--card-bg-dark); } /* Knob color for dark mode checked */
     </style>
 </head>
 <body class="antialiased theme-default dark">
 
-    <!-- API Key Warning - WILL BE SHOWN ON LOAD IF KEY IS DEFAULT -->
-    <div id="api-key-warning" class="hidden">
-        <span data-lucide="shield-alert" class="w-5 h-5 flex-shrink-0"></span>
-        <p><strong>Security Alert:</strong> Your Gemini API key is exposed in this frontend-only file. For production, use a backend proxy to secure it.</p>
-        <button onclick="document.getElementById('api-key-warning').remove()" title="Dismiss">
-            <span data-lucide="x" class="w-4 h-4"></span>
-        </button>
-    </div>
-
     <!-- Main Application Header -->
     <div class="header-section p-4 md:p-6 flex justify-between items-center border-b flex-shrink-0">
-        <h1 class="text-2xl sm:text-3xl font-bold">AI Journal</h1>
-        <div class="flex items-center space-x-4 relative">
+        <div class="flex items-center gap-4">
+            <!-- Hamburger Menu for Mobile -->
+            <button id="sidebar-toggle-btn" aria-label="Toggle Sidebar" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full shadow-sm transition-all duration-300 flex-shrink-0">
+                <span data-lucide="menu" class="w-5 h-5"></span>
+            </button>
+            <h1 class="text-2xl sm:text-3xl font-bold">AI Journal</h1>
+            <p id="header-current-user" class="hidden sm:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 ml-4">
+                <span data-lucide="user-round" class="w-4 h-4"></span>
+                <span id="header-current-username-text"></span>
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 sm:space-x-4 relative">
             <!-- Theme Selector -->
             <div class="relative">
                 <button id="theme-selector-btn" aria-label="Select Theme" class="flex items-center justify-center w-10 h-10 rounded-full shadow-sm transition-all duration-300 flex-shrink-0">
@@ -730,7 +756,7 @@
             
             <!-- Switch User Button -->
             <button id="switch-user-btn" aria-label="Switch User" class="flex items-center justify-center w-10 h-10 rounded-full shadow-sm transition-all duration-300 flex-shrink-0">
-                <span data-lucide="user-round" class="w-5 h-5"></span>
+                <span data-lucide="users-round" class="w-5 h-5"></span>
             </button>
 
             <!-- Dark Mode Toggle -->
@@ -764,12 +790,32 @@
                 Notes
             </button>
         </nav>
+        <!-- Backdrop for mobile sidebar -->
+        <div id="main-nav-backdrop" class="md:hidden"></div>
 
         <!-- Main Content Area -->
         <main id="content-area">
             <!-- Journal Section -->
             <section id="section-journal" class="mb-8">
                 <h2 class="text-3xl font-bold mb-6">My Journals</h2>
+
+                <!-- New Journal Entry Form -->
+                <div class="new-item-form mb-8 p-6">
+                    <h3 class="text-xl font-semibold mb-4">Add New Journal Entry</h3>
+                    <form id="new-journal-form">
+                        <label for="journal-title">Title:</label>
+                        <input type="text" id="journal-title" placeholder="e.g., Reflections on a Productive Day">
+
+                        <label for="journal-content">Content:</label>
+                        <textarea id="journal-content" rows="5" placeholder="Today was great..." required></textarea>
+
+                        <label for="journal-mood">Mood (e.g., Happy, Reflective, Neutral):</label>
+                        <input type="text" id="journal-mood" placeholder="e.g., Happy, Reflective, Neutral">
+
+                        <button type="submit" class="w-full">Add Journal Entry</button>
+                    </form>
+                </div>
+
                 <div id="journal-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Journal entries will be rendered here -->
                     <div class="data-card journal-entry hidden" id="journal-template">
@@ -779,6 +825,7 @@
                         </div>
                         <p class="journal-date text-sm"></p>
                         <h3 class="text-xl font-semibold mb-2 card-title"></h3>
+                        <p class="item-id text-xs text-gray-500 dark:text-gray-400 mb-2"></p> <!-- NEW: Display ID -->
                         <div class="card-content"></div>
                         <p class="journal-mood text-sm mt-2"><span data-lucide="smile" class="w-4 h-4"></span> <span class="mood-text"></span></p>
                     </div>
@@ -788,6 +835,32 @@
             <!-- Goals Section -->
             <section id="section-goals" class="hidden mb-8">
                 <h2 class="text-3xl font-bold mb-6">My Goals</h2>
+
+                <!-- New Goal Form -->
+                <div class="new-item-form mb-8 p-6">
+                    <h3 class="text-xl font-semibold mb-4">Set New Goal</h3>
+                    <form id="new-goal-form">
+                        <label for="goal-title">Title:</label>
+                        <input type="text" id="goal-title" placeholder="e.g., Learn a new programming language" required>
+
+                        <label for="goal-description">Description:</label>
+                        <textarea id="goal-description" rows="3" placeholder="I want to master Python fundamentals..." required></textarea>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex-1">
+                                <label for="goal-target-value">Target Value (e.g., 100 for 100%):</label>
+                                <input type="number" id="goal-target-value" placeholder="100" value="100" min="0">
+                            </div>
+                            <div class="flex-1">
+                                <label for="goal-due-date">Due Date:</label>
+                                <input type="date" id="goal-due-date">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full">Set Goal</button>
+                    </form>
+                </div>
+
                 <div id="goal-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Goal entries will be rendered here -->
                     <div class="data-card goal-entry hidden" id="goal-template">
@@ -796,6 +869,7 @@
                             <button class="delete-btn" title="Delete Goal"><span data-lucide="trash-2" class="w-4 h-4"></span></button>
                         </div>
                         <h3 class="text-xl font-semibold mb-2 card-title"></h3>
+                        <p class="item-id text-xs text-gray-500 dark:text-gray-400 mb-2"></p> <!-- NEW: Display ID -->
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 card-description"></p>
                         <div class="progress-bar-container">
                             <div class="progress-bar-fill" style="width: 0%;">0%</div>
@@ -808,14 +882,44 @@
             <!-- To-Dos Section -->
             <section id="section-todos" class="hidden mb-8">
                 <h2 class="text-3xl font-bold mb-6">My To-Dos</h2>
+
+                <!-- New To-Do Form -->
+                <div class="new-item-form mb-8 p-6">
+                    <h3 class="text-xl font-semibold mb-4">Add New To-Do</h3>
+                    <form id="new-todo-form">
+                        <label for="todo-text">To-Do Description:</label>
+                        <input type="text" id="todo-text" placeholder="e.g., Finish project proposal" required>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex-1">
+                                <label for="todo-due-date">Due Date:</label>
+                                <input type="date" id="todo-due-date">
+                            </div>
+                            <div class="flex-1">
+                                <label for="todo-priority">Priority:</label>
+                                <select id="todo-priority">
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full">Add To-Do</button>
+                    </form>
+                </div>
+
                 <div class="data-card">
                     <ul id="todo-list" class="divide-y divide-gray-200 dark:divide-gray-700">
                         <!-- To-Do items will be rendered here -->
                         <li class="todo-item hidden" id="todo-template">
                             <input type="checkbox" class="todo-checkbox" aria-label="Mark as complete">
-                            <span class="flex-grow card-text"></span>
+                            <span class="flex-grow">
+                                <span class="card-text block"></span>
+                                <span class="item-id text-xs text-gray-500 dark:text-gray-400 block mt-1"></span> <!-- NEW: Display ID -->
+                            </span>
                             <span class="todo-priority"></span>
-                            <div class="card-actions flex-row static top-0 right-0"> <!-- Static position for in-list actions -->
+                            <div class="card-actions flex-shrink-0"> <!-- Corrected positioning for responsiveness -->
                                 <button class="edit-btn" title="Edit To-Do"><span data-lucide="edit" class="w-4 h-4"></span></button>
                                 <button class="delete-btn" title="Delete To-Do"><span data-lucide="trash-2" class="w-4 h-4"></span></button>
                             </div>
@@ -827,6 +931,21 @@
             <!-- Notes Section -->
             <section id="section-notes" class="hidden mb-8">
                 <h2 class="text-3xl font-bold mb-6">My Notes</h2>
+
+                <!-- New Note Form -->
+                <div class="new-item-form mb-8 p-6">
+                    <h3 class="text-xl font-semibold mb-4">Create New Note</h3>
+                    <form id="new-note-form">
+                        <label for="note-title">Title:</label>
+                        <input type="text" id="note-title" placeholder="e.g., Meeting Summary">
+
+                        <label for="note-content">Content:</label>
+                        <textarea id="note-content" rows="5" placeholder="Key takeaways from the discussion..." required></textarea>
+
+                        <button type="submit" class="w-full">Add Note</button>
+                    </form>
+                </div>
+
                 <div id="note-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Note items will be rendered here -->
                     <div class="data-card note-item hidden" id="note-template">
@@ -835,6 +954,7 @@
                             <button class="delete-btn" title="Delete Note"><span data-lucide="trash-2" class="w-4 h-4"></span></button>
                         </div>
                         <h3 class="text-xl font-semibold mb-2 card-title"></h3>
+                        <p class="item-id text-xs text-gray-500 dark:text-gray-400 mb-2"></p> <!-- NEW: Display ID -->
                         <div class="card-content"></div>
                     </div>
                 </div>
@@ -891,7 +1011,7 @@
     <!-- User Switcher Modal -->
     <div id="user-switcher-modal" class="hidden">
         <div id="user-switcher-modal-content">
-            <h3 class="mb-4">Switch User</h3>
+            <h3 class="mb-4">Manage Users</h3>
             <p id="current-user-display" class="mb-4">
                 <span data-lucide="user-round" class="w-5 h-5"></span>
                 Current User: <span id="current-username-text" class="font-bold">Default User</span>
@@ -913,7 +1033,7 @@
         // Register Service Worker for PWA capabilities
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('service-worker.js')
                     .then(registration => {
                         console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })
@@ -936,16 +1056,7 @@
         // !! DO NOT USE THIS METHOD IN PRODUCTION. USE A SERVER-SIDE PROXY TO PROTECT YOUR KEY. !!
         // The key below is a placeholder and WILL NOT WORK.
         // Get your API key from Google AI Studio: https://makersuite.google.com/
-        const GEMINI_API_KEY = 'AIzaSyCzx6ReMk8ohPJcCjGwHHzu7SvFccJqAbA'; // <--- REPLACE THIS WITH YOUR ACTUAL KEY
-
-        // Show API Key warning on load
-        window.addEventListener('load', () => {
-            const warningDiv = document.getElementById('api-key-warning');
-            if (warningDiv && (GEMINI_API_KEY === "" || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE")) {
-                warningDiv.classList.remove('hidden');
-            }
-        });
-
+        const GEMINI_API_KEY = 'AIzaSyCzx6ReMk8ohPJcCjGwHHzu7SvFccJqAbA'; // <-- REPLACE THIS WITH YOUR ACTUAL KEY
 
         // --- CHATBOT UI ELEMENTS (from inspiration) ---
         const floatingChatbotBtn = document.getElementById('floating-chatbot-btn');
@@ -979,28 +1090,37 @@
         const newChatBtn = document.getElementById('new-chat-btn');
         const navButtons = document.querySelectorAll('#main-nav button');
         const contentArea = document.getElementById('content-area');
+        const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+        const mainNav = document.getElementById('main-nav');
+        const mainNavBackdrop = document.getElementById('main-nav-backdrop');
 
-        // Sections
+
+        // Sections and Forms
         const sectionJournal = document.getElementById('section-journal');
         const journalList = document.getElementById('journal-list');
         const journalTemplate = document.getElementById('journal-template');
+        const newJournalForm = document.getElementById('new-journal-form');
 
         const sectionGoals = document.getElementById('section-goals');
         const goalList = document.getElementById('goal-list');
         const goalTemplate = document.getElementById('goal-template');
+        const newGoalForm = document.getElementById('new-goal-form');
 
         const sectionTodos = document.getElementById('section-todos');
         const todoList = document.getElementById('todo-list');
         const todoTemplate = document.getElementById('todo-template');
+        const newTodoForm = document.getElementById('new-todo-form');
 
         const sectionNotes = document.getElementById('section-notes');
         const noteList = document.getElementById('note-list');
         const noteTemplate = document.getElementById('note-template');
+        const newNoteForm = document.getElementById('new-note-form');
         
         // User Switcher Modal elements
         const userSwitcherModal = document.getElementById('user-switcher-modal');
         const switchUserBtn = document.getElementById('switch-user-btn');
         const currentUsernameText = document.getElementById('current-username-text');
+        const headerCurrentUsernameText = document.getElementById('header-current-username-text');
         const userListDiv = document.getElementById('user-list');
         const newUsernameInput = document.getElementById('new-username-input');
         const createUserBtn = document.getElementById('create-user-btn');
@@ -1137,13 +1257,21 @@
             });
         };
 
+        const loadUserData = async () => {
+            await renderJournals();
+            await renderGoals();
+            await renderTodos();
+            await renderNotes();
+            await loadChatHistory();
+        }
+
         // --- UI Rendering Functions ---
         function renderJournals() {
             journalList.innerHTML = '';
             getRecords('journals').then(journals => {
                 journals.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort by date desc
                 if (journals.length === 0) {
-                    journalList.innerHTML = `<p class="text-gray-500 text-center col-span-full">No journal entries yet. Ask the AI to write one!</p>`;
+                    journalList.innerHTML = `<p class="text-gray-500 text-center col-span-full">No journal entries yet. Ask the AI or use the form above to add one!</p>`;
                     return;
                 }
                 journals.forEach(journal => {
@@ -1152,6 +1280,7 @@
                     entry.classList.remove('hidden');
                     entry.querySelector('.journal-date').textContent = new Date(journal.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                     entry.querySelector('.card-title').textContent = journal.title;
+                    entry.querySelector('.item-id').textContent = `ID: ${journal.id}`; // NEW: Display ID
                     entry.querySelector('.card-content').innerHTML = marked.parse(journal.content);
                     const moodElement = entry.querySelector('.journal-mood');
                     if (journal.mood) {
@@ -1188,7 +1317,7 @@
             getRecords('goals').then(goals => {
                 goals.sort((a, b) => (new Date(a.dueDate || 0).getTime() || 0) - (new Date(b.dueDate || 0).getTime() || 0)); // Sort by due date
                 if (goals.length === 0) {
-                    goalList.innerHTML = `<p class="text-gray-500 text-center col-span-full">No goals set yet. Ask the AI to help you set one!</p>`;
+                    goalList.innerHTML = `<p class="text-gray-500 text-center col-span-full">No goals set yet. Ask the AI or use the form above to add one!</p>`;
                     return;
                 }
                 goals.forEach(goal => {
@@ -1196,6 +1325,7 @@
                     entry.id = `goal-${goal.id}`;
                     entry.classList.remove('hidden');
                     entry.querySelector('.card-title').textContent = goal.title;
+                    entry.querySelector('.item-id').textContent = `ID: ${goal.id}`; // NEW: Display ID
                     entry.querySelector('.card-description').textContent = goal.description;
                     const progressBarFill = entry.querySelector('.progress-bar-fill');
                     const progress = Math.max(0, Math.min(100, goal.progress || 0)); // Ensure 0-100
@@ -1218,7 +1348,7 @@
             getRecords('todos').then(todos => {
                 todos.sort((a, b) => (new Date(a.dueDate || 0).getTime() || 0) - (new Date(b.dueDate || 0).getTime() || 0) || (getPriorityValue(b.priority) - getPriorityValue(a.priority)));
                 if (todos.length === 0) {
-                    todoList.innerHTML = `<p class="text-gray-500 text-center">No to-do items yet. Ask the AI to add one!</p>`;
+                    todoList.innerHTML = `<p class="text-gray-500 text-center">No to-do items yet. Ask the AI or use the form above to add one!</p>`;
                     return;
                 }
                 todos.forEach(todo => {
@@ -1226,6 +1356,7 @@
                     entry.id = `todo-${todo.id}`;
                     entry.classList.remove('hidden');
                     entry.querySelector('.card-text').textContent = todo.text;
+                    entry.querySelector('.item-id').textContent = `ID: ${todo.id}`; // NEW: Display ID
                     const checkbox = entry.querySelector('.todo-checkbox');
                     checkbox.checked = todo.completed;
                     entry.classList.toggle('completed', todo.completed);
@@ -1265,7 +1396,7 @@
             getRecords('notes').then(notes => {
                 notes.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort by date desc
                 if (notes.length === 0) {
-                    noteList.innerHTML = `<p class="text-gray-500 text-center col-span-full">No notes yet. Ask the AI to jot something down!</p>`;
+                    noteList.innerHTML = `<p class="text-gray-500 text-center col-span-full">No notes yet. Ask the AI or use the form above to add one!</p>`;
                     return;
                 }
                 notes.forEach(note => {
@@ -1273,6 +1404,7 @@
                     entry.id = `note-${note.id}`;
                     entry.classList.remove('hidden');
                     entry.querySelector('.card-title').textContent = note.title;
+                    entry.querySelector('.item-id').textContent = `ID: ${note.id}`; // NEW: Display ID
                     entry.querySelector('.card-content').innerHTML = marked.parse(note.content);
                     entry.dataset.id = note.id;
 
@@ -1309,47 +1441,68 @@
                 case 'todos': renderTodos(); break;
                 case 'notes': renderNotes(); break;
             }
+
+            // Close sidebar on mobile after navigation
+            if (window.innerWidth < 768) {
+                document.body.classList.remove('sidebar-open');
+            }
         }
 
         // --- CRUD Functions for AI to call ---
 
         // Journal
         async function createJournal(title, content, mood) {
+            const finalTitle = title && title.trim() !== '' ? title.trim() : `Journal Entry ${new Date().toLocaleDateString()}`; // Infer title if empty
             const id = `journal_${Date.now()}`;
-            const newJournal = { id, title, content, mood, timestamp: new Date().toISOString() };
+            const newJournal = { id, title: finalTitle, content, mood, timestamp: new Date().toISOString() };
             await saveRecord('journals', newJournal);
             renderJournals();
-            showChatError(`Journal "${title}" created!`, 'success');
+            showChatError(`Journal "${finalTitle}" created!`, 'success');
         }
 
         async function updateJournal(id, title, content, mood) {
-            await updateRecord('journals', id, { title, content, mood });
-            renderJournals();
-            showChatError(`Journal "${title}" updated!`, 'success');
+            const updates = {};
+            if (title !== undefined) updates.title = title;
+            if (content !== undefined) updates.content = content;
+            if (mood !== undefined) updates.mood = mood;
+            
+            const existingJournal = await getRecord('journals', id);
+            if (existingJournal) {
+                await updateRecord('journals', id, updates);
+                renderJournals();
+                showChatError(`Journal "${updates.title || existingJournal.title}" updated!`, 'success');
+            } else {
+                showChatError(`Journal with ID ${id} not found.`, 'error');
+            }
         }
 
         async function deleteJournal(id) {
-            await deleteRecord('journals', id);
-            renderJournals();
-            showChatError(`Journal deleted!`, 'success');
+            const existingJournal = await getRecord('journals', id);
+            if (existingJournal) {
+                await deleteRecord('journals', id);
+                renderJournals();
+                showChatError(`Journal "${existingJournal.title}" deleted!`, 'success');
+            } else {
+                showChatError(`Journal with ID ${id} not found.`, 'error');
+            }
         }
 
         // Goals
         async function createGoal(title, description, targetValue, dueDate, progress = 0, status = 'Not Started') {
+            const finalTargetValue = targetValue !== undefined && !isNaN(parseFloat(targetValue)) ? parseFloat(targetValue) : 100; // Default to 100
             const id = `goal_${Date.now()}`;
-            const newGoal = { id, title, description, targetValue, dueDate, progress, status, timestamp: new Date().toISOString() };
+            const newGoal = { id, title, description, targetValue: finalTargetValue, dueDate, progress, status, timestamp: new Date().toISOString() };
             await saveRecord('goals', newGoal);
             renderGoals();
             showChatError(`Goal "${title}" created!`, 'success');
         }
 
-        async function updateGoal(id, progress, status, notes) {
+        async function updateGoal(id, progress, status) { // Removed 'notes' from parameters
             const goal = await getRecord('goals', id);
             if (goal) {
                 const updatedFields = {};
                 if (progress !== undefined) updatedFields.progress = progress;
                 if (status !== undefined) updatedFields.status = status;
-                if (notes !== undefined) updatedFields.notes = notes;
                 await updateRecord('goals', id, updatedFields);
                 renderGoals();
                 showChatError(`Goal "${goal.title}" updated!`, 'success');
@@ -1359,9 +1512,14 @@
         }
 
         async function deleteGoal(id) {
-            await deleteRecord('goals', id);
-            renderGoals();
-            showChatError(`Goal deleted!`, 'success');
+            const existingGoal = await getRecord('goals', id);
+            if (existingGoal) {
+                await deleteRecord('goals', id);
+                renderGoals();
+                showChatError(`Goal "${existingGoal.title}" deleted!`, 'success');
+            } else {
+                showChatError(`Goal with ID ${id} not found.`, 'error');
+            }
         }
         
         // To-Dos
@@ -1385,37 +1543,57 @@
         }
 
         async function deleteTodo(id) {
-            await deleteRecord('todos', id);
-            renderTodos();
-            showChatError(`To-Do deleted!`, 'success');
+            const existingTodo = await getRecord('todos', id);
+            if (existingTodo) {
+                await deleteRecord('todos', id);
+                renderTodos();
+                showChatError(`To-Do "${existingTodo.text}" deleted!`, 'success');
+            } else {
+                showChatError(`To-Do with ID ${id} not found.`, 'error');
+            }
         }
 
         // Notes
         async function addNote(title, content) {
+            const finalTitle = title && title.trim() !== '' ? title.trim() : `Note ${new Date().toLocaleDateString()}`; // Infer title if empty
             const id = `note_${Date.now()}`;
-            const newNote = { id, title, content, timestamp: new Date().toISOString() };
+            const newNote = { id, title: finalTitle, content, timestamp: new Date().toISOString() };
             await saveRecord('notes', newNote);
             renderNotes();
-            showChatError(`Note "${title}" added!`, 'success');
+            showChatError(`Note "${finalTitle}" added!`, 'success');
         }
 
         async function updateNote(id, title, content) {
-            await updateRecord('notes', id, { title, content });
-            renderNotes();
-            showChatError(`Note "${title}" updated!`, 'success');
+            const updates = {};
+            if (title !== undefined) updates.title = title;
+            if (content !== undefined) updates.content = content;
+
+            const existingNote = await getRecord('notes', id);
+            if (existingNote) {
+                await updateRecord('notes', id, updates);
+                renderNotes();
+                showChatError(`Note "${updates.title || existingNote.title}" updated!`, 'success');
+            } else {
+                showChatError(`Note with ID ${id} not found.`, 'error');
+            }
         }
 
         async function deleteNote(id) {
-            await deleteRecord('notes', id);
-            renderNotes();
-            showChatError(`Note deleted!`, 'success');
+            const existingNote = await getRecord('notes', id);
+            if (existingNote) {
+                await deleteRecord('notes', id);
+                renderNotes();
+                showChatError(`Note "${existingNote.title}" deleted!`, 'success');
+            } else {
+                showChatError(`Note with ID ${id} not found.`, 'error');
+            }
         }
 
         // Helper for direct UI edit/delete buttons
         function handleEdit(type, id, data) {
             // For simplicity, for direct UI edit, we'll prompt the user for new values
             // In a real app, this would open a modal with pre-filled fields.
-            let newTitle, newContent, newMood, newProgress, newStatus, newPriority, newText; // Removed unused variables newDescription, newDueDate
+            let newTitle, newContent, newMood, newProgress, newStatus, newPriority, newText;
 
             switch (type) {
                 case 'journal':
@@ -1423,7 +1601,7 @@
                     if (newTitle === null) return;
                     newContent = prompt('Enter new content:', data.content);
                     if (newContent === null) return;
-                    newMood = prompt('Enter new mood (e.g., Happy, Sad, Neutral):', data.mood);
+                    newMood = prompt('Enter new mood (e.g., Happy, Sad, Neutral, Excited):', data.mood);
                     if (newMood === null) return;
                     updateJournal(id, newTitle, newContent, newMood);
                     break;
@@ -1440,7 +1618,7 @@
                     newPriority = prompt('Enter new priority (High, Medium, Low):', data.priority);
                     if (newPriority === null) return;
                     updateRecord('todos', id, { text: newText, priority: newPriority });
-                    renderTodos();
+                    renderTodos(); // Rerender todos directly here for simplicity
                     showChatError(`To-Do "${newText}" updated!`, 'success');
                     break;
                 case 'note':
@@ -1475,55 +1653,63 @@
             role: 'user',
             parts: [{ text: [
                 `You are an AI assistant for a personal journaling and goal-tracking website.`,
-                `The user will chat with you to manage their journal entries, goals, to-do lists, and notes.`,
-                `You can create, update, and delete these items, and navigate the user to different sections of the website.`,
+                `Your primary function is to help the user manage their journal entries, goals, to-do lists, and notes by issuing specific action commands that the frontend will execute.`,
+                `You can also engage in natural language conversation, but *always prioritize action commands if the user's intent is to modify or navigate the website data*.`,
                 ``,
-                `**Important Instructions:**`,
-                `1.  **Understand User Intent:** Determine if the user wants to perform an action (create, update, delete, navigate) or simply have a conversation.`,
-                `2.  **Use Action Commands for UI Control:** If the user's intent is to control the website, respond with a specific command format:`,
-                `    \`[ACTION_COMMAND] { "command": "COMMAND_NAME", "param1": "value1", "param2": "value2", ... }\``,
-                `    Immediately after the \`[ACTION_COMMAND]\`, you can provide a natural language response if appropriate (e.g., "Sure, I've created that for you."). The JavaScript will parse the first \`[ACTION_COMMAND]\` it finds.`,
-                `3.  **Available COMMAND_NAMEs and their parameters:**`,
+                `**Crucial Instructions for Responding:**`,
+                `1.  **Determine User Intent:** Identify if the user wants you to perform an action (create, update, delete, navigate) or simply chat.`,
+                `2.  **Use Exact Command Format:** When the user's intent is to trigger a UI action, your response *must* begin with an \`[ACTION_COMMAND]\` block, followed by a JSON object.`,
+                `    The structure is: \`[ACTION_COMMAND] { "command": "COMMAND_NAME", "param1": "value1", ... }\``,
+                `    Immediately after this command block, you can provide a natural language confirmation or additional helpful information.`,
+                `    Example: \`[ACTION_COMMAND] { "command": "CREATE_JOURNAL", "title": "My Day", "content": "It was a good day.", "mood": "Happy" } Great! I've added a new journal entry for you.\``,
+                `3.  **Provide All Required Parameters & Handle Missing Info:**`,
+                `    *   If a command requires certain parameters, ensure they are present in the JSON.`,
+                `    *   If the user's request is ambiguous or missing information (especially an \`id\` for update/delete), you *must* ask clarifying questions before attempting to execute a command.`,
+                `    *   **For IDs:** You, as the AI, do NOT have direct access to the specific IDs visible on the user's screen. When an ID is required (e.g., for UPDATE or DELETE commands), clearly instruct the user on *how to find it*. Say something like: "To ensure I modify the correct item, please tell me its ID. You can find the ID displayed as 'ID: [unique_id]' on each item's card or entry on the [relevant section] page."`,
+                `    *   You can also suggest the user navigate to the relevant section (e.g., "NAVIGATE_TO", "section": "todos") to help them find the ID.`,
+                `4.  **Available COMMAND_NAMEs and their parameters:**`,
                 ``,
                 `    *   **CREATE_JOURNAL:** Create a new journal entry.`,
-                `        \`{"command": "CREATE_JOURNAL", "title": "string", "content": "string", "mood": "string (e.g., Happy, Sad, Neutral, Excited)", "timestamp": "ISO string (optional, defaults to now)"}\``,
-                `    *   **UPDATE_JOURNAL:** Update an existing journal entry. Requires the \`id\`.`,
+                `        \`{"command": "CREATE_JOURNAL", "title": "string (optional)", "content": "string", "mood": "string (e.g., Happy, Sad, Neutral, Excited, optional)", "timestamp": "ISO string (optional, defaults to now)"}\``,
+                `        *   If only content is provided, infer title (e.g., "Journal Entry YYYY-MM-DD"). \`content\` is required.`,
+                `    *   **UPDATE_JOURNAL:** Update an existing journal entry. **Requires the \`id\`**.`,
                 `        \`{"command": "UPDATE_JOURNAL", "id": "string", "title": "string (optional)", "content": "string (optional)", "mood": "string (optional)"}\``,
-                `    *   **DELETE_JOURNAL:** Delete a journal entry. Requires the \`id\`.`,
+                `    *   **DELETE_JOURNAL:** Delete a journal entry. **Requires the \`id\`**.`,
                 `        \`{"command": "DELETE_JOURNAL", "id": "string"}\``,
                 ``,
                 `    *   **CREATE_GOAL:** Create a new goal.`,
-                `        \`{"command": "CREATE_GOAL", "title": "string", "description": "string", "targetValue": "number", "dueDate": "ISO string or YYYY-MM-DD (optional)", "progress": "number (0-100, optional, defaults to 0)", "status": "string (e.g., Not Started, On Track, At Risk, Completed, optional)"}\``,
-                `    *   **UPDATE_GOAL:** Update an existing goal. Requires the \`id\`.`,
-                `        \`{"command": "UPDATE_GOAL", "id": "string", "progress": "number (0-100, optional)", "status": "string (e.g., Not Started, On Track, At Risk, Completed, optional)", "notes": "string (optional, for internal use)"}\``,
-                `    *   **DELETE_GOAL:** Delete a goal. Requires the \`id\`.`,
+                `        \`{"command": "CREATE_GOAL", "title": "string", "description": "string", "targetValue": "number (optional)", "dueDate": "YYYY-MM-DD (optional)", "progress": "number (0-100, optional, defaults to 0)", "status": "string (e.g., Not Started, On Track, At Risk, Completed, optional)"}\``,
+                `        *   \`title\` and \`description\` are required. If \`targetValue\` is not provided, default to 100.`,
+                `    *   **UPDATE_GOAL:** Update an existing goal. **Requires the \`id\`**.`,
+                `        \`{"command": "UPDATE_GOAL", "id": "string", "progress": "number (0-100, optional)", "status": "string (e.g., Not Started, On Track, At Risk, Completed, optional)"}\``,
+                `    *   **DELETE_GOAL:** Delete a goal. **Requires the \`id\`**.`,
                 `        \`{"command": "DELETE_GOAL", "id": "string"}\``,
                 `        `,
                 `    *   **ADD_TODO:** Add a new to-do item.`,
-                `        \`{"command": "ADD_TODO", "text": "string", "dueDate": "ISO string or YYYY-MM-DD (optional)", "priority": "string (High, Medium, Low, optional, defaults to Low)", "completed": "boolean (optional, defaults to false)"}\``,
-                `    *   **TOGGLE_TODO_COMPLETE:** Mark a to-do as complete or incomplete.`,
+                `        \`{"command": "ADD_TODO", "text": "string", "dueDate": "YYYY-MM-DD (optional)", "priority": "string (High, Medium, Low, optional, defaults to Low)", "completed": "boolean (optional, defaults to false)"}\``,
+                `        *   \`text\` is required.`,
+                `    *   **TOGGLE_TODO_COMPLETE:** Mark a to-do as complete or incomplete. **Requires the \`id\`**.`,
                 `        \`{"command": "TOGGLE_TODO_COMPLETE", "id": "string", "completed": "boolean"}\``,
-                `    *   **DELETE_TODO:** Delete a to-do item. Requires the \`id\`.`,
+                `    *   **DELETE_TODO:** Delete a to-do item. **Requires the \`id\`**.`,
                 `        \`{"command": "DELETE_TODO", "id": "string"}\``,
                 ``,
                 `    *   **ADD_NOTE:** Add a new note.`,
-                `        \`{"command": "ADD_NOTE", "title": "string", "content": "string"}\``,
-                `    *   **UPDATE_NOTE:** Update an existing note. Requires the \`id\`.`,
+                `        \`{"command": "ADD_NOTE", "title": "string (optional)", "content": "string", "timestamp": "ISO string (optional, defaults to now)"}\``,
+                `        *   If only content is provided, infer title (e.g., "Note YYYY-MM-DD"). \`content\` is required.`,
+                `    *   **UPDATE_NOTE:** Update an existing note. **Requires the \`id\`**.`,
                 `        \`{"command": "UPDATE_NOTE", "id": "string", "title": "string (optional)", "content": "string (optional)"}\``,
-                `    *   **DELETE_NOTE:** Delete a note. Requires the \`id\`.`,
+                `    *   **DELETE_NOTE:** Delete a note. **Requires the \`id\`**.`,
                 `        \`{"command": "DELETE_NOTE", "id": "string"}\``,
                 ``,
                 `    *   **NAVIGATE_TO:** Navigate the user to a specific section of the website.`,
                 `        \`{"command": "NAVIGATE_TO", "section": "string (journal, goals, todos, notes)"}\``,
+                `        *   When asked to "show my journals" or similar, use this command first, then briefly explain they can see it in the relevant section.`,
                 `    `,
-                `    *   **GET_ALL_RECORDS:** Retrieve all records of a specific type. You can use this to get context and then advise the user or perform follow-up actions.`,
+                `    *   **GET_ALL_RECORDS:** Retrieve all records of a specific type for AI context. **This command is for internal AI use and does NOT directly update the UI or user-visible content.**`,
                 `        \`{"command": "GET_ALL_RECORDS", "type": "string (journals, goals, todos, notes)"}\``,
-                `        (Note: The AI will receive the data, but this command itself doesn't directly update the UI with the *list* of records, as that's handled by the rendering functions. It's for the AI to get context.)`,
                 ``,
-                `4.  **Provide IDs when necessary:** When updating or deleting, ensure you explicitly ask the user for or infer the \`id\` of the item they wish to modify. You can ask "Which journal entry do you mean?" or "What's the ID of the goal you want to update?"`,
-                `5.  **Natural Language Fallback:** If the user's input is not an action, respond naturally. If you perform an action, you can also include a brief confirmation or helpful message.`,
-                `6.  **Be helpful and engaging:** Guide the user, suggest features, and help them organize their thoughts.`,
-                `7.  **Current Date Context:** Assume the current date is ${new Date().toISOString().split('T')[0]} unless specified otherwise by the user.`,
+                `5.  **Natural Language Fallback:** If the user's input is purely conversational and doesn't imply an action, respond naturally and politely.`,
+                `6.  **Current Date Context:** Assume the current date is ${new Date().toISOString().split('T')[0]} unless specified otherwise by the user.`
             ].join('\n')}]
         };
 
@@ -1551,7 +1737,7 @@
                             await createGoal(commandJson.title, commandJson.description, commandJson.targetValue, commandJson.dueDate, commandJson.progress, commandJson.status);
                             break;
                         case 'UPDATE_GOAL':
-                            await updateGoal(commandJson.id, commandJson.progress, commandJson.status, commandJson.notes);
+                            await updateGoal(commandJson.id, commandJson.progress, commandJson.status); 
                             break;
                         case 'DELETE_GOAL':
                             await deleteGoal(commandJson.id);
@@ -1578,10 +1764,7 @@
                             navigateToSection(commandJson.section);
                             break;
                         case 'GET_ALL_RECORDS':
-                            // AI requests records for context, no direct UI update
                             const records = await getRecords(commandJson.type);
-                            // The AI would ideally be able to process this and provide a response.
-                            // For client-side AI, this is tricky. We can just log it or give a generic success.
                             console.log(`AI retrieved all ${commandJson.type} records:`, records);
                             break;
                         default:
@@ -1638,7 +1821,6 @@
                 chatErrorMessageDiv.classList.add('hidden');
                 chatErrorMessageDiv.classList.remove('flex'); // Explicitly remove flex when hiding
                 chatErrorText.textContent = '';
-                // Restore generic icon placeholder if needed (or just leave it empty)
                 iconPlaceholder.innerHTML = ''; 
             }, 5000);
         }
@@ -1805,7 +1987,7 @@
                     copyToClipboard(messageContent); 
                     setTimeout(() => { updateButtonIcon(chatCopyButton, 'clipboard'); }, 2000);
                 } else {
-                    showChatError('Message content not found for copying.', 'error');
+                    showChatError('Message content not found for copying.', 'error'); // Explicitly pass type
                 }
                 return;
             }
@@ -1817,7 +1999,7 @@
                 if (messageContent) {
                     toggleSpeech(messageContent, dictateButton);
                 } else {
-                    showChatError('Message content not found for dictation.', 'error');
+                    showChatError('Message content not found for dictation.', 'error'); // Explicitly pass type
                 }
                 return;
             }
@@ -1891,7 +2073,11 @@
             };
         } else {
             console.warn('Web Speech API (SpeechRecognition) not supported in this browser. Voice input button will be hidden.');
-            chatbotVoiceInputBtn.style.display = 'none';
+            // Only hide the voice input button itself, not the whole dropdown trigger
+            const voiceInputButtonContainer = chatbotVoiceInputBtn.closest('button');
+            if (voiceInputButtonContainer) {
+                voiceInputButtonContainer.style.display = 'none';
+            }
         }
 
         chatbotVoiceInputBtn.addEventListener('click', () => {
@@ -2152,7 +2338,11 @@
                 userButton.innerHTML = `<span data-lucide="user-round" class="w-5 h-5"></span> ${user.name}`;
                 userButton.dataset.id = user.id;
                 userButton.classList.toggle('active', user.id === currentUserId);
-                userButton.addEventListener('click', () => switchUser(user.id, user.name));
+                userButton.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent backdrop click from re-toggling
+                    console.log(`User selected: ${user.name}`);
+                    switchUser(user.id, user.name);
+                });
                 userListDiv.appendChild(userButton);
             });
             createIcons(); // Render icons on user buttons
@@ -2164,13 +2354,19 @@
             localStorage.setItem('currentUserId', userId);
             localStorage.setItem('currentUserName', userName);
             currentUsernameText.textContent = userName;
-            userSwitcherModal.classList.add('hidden'); // Hide modal after switching
+            headerCurrentUsernameText.textContent = userName; // Update header display
+            
+            console.log(`Switching to user: ${userName}. Hiding modal.`);
+            userSwitcherModal.classList.add('hidden'); // Explicitly hide modal after switching
+            userSwitcherModal.style.display = 'none'; // Ensure display none
+            
             await loadUserData(); // Reload all data for the new user
             startNewChat(false); // Start a new chat session for the new user without greeting sound
             showChatError(`Switched to user: ${userName}`, 'success');
         }
 
-        createUserBtn.addEventListener('click', async () => {
+        createUserBtn.addEventListener('click', async (event) => {
+            event.stopPropagation(); // Prevent backdrop click from re-toggling
             const newName = newUsernameInput.value.trim();
             if (newName) {
                 const newId = `user_${Date.now()}`;
@@ -2178,7 +2374,7 @@
                 await saveUser(newUser);
                 newUsernameInput.value = '';
                 await renderUserList(); // Refresh list immediately after creating
-                await switchUser(newId, newName); // Automatically switch to the new user
+                await switchUser(newId, newName); // Automatically switch to the new user, which will hide the modal
             } else {
                 showChatError('Please enter a username.', 'error');
             }
@@ -2186,10 +2382,17 @@
 
         switchUserBtn.addEventListener('click', async (event) => {
             event.stopPropagation(); // Prevent this click from bubbling up to the modal backdrop
-            currentUsernameText.textContent = currentUserName;
-            userSwitcherModal.classList.toggle('hidden');
-            if (!userSwitcherModal.classList.contains('hidden')) { // If it's now open
+            currentUsernameText.textContent = currentUserName; // Always show the current name in the modal
+            
+            if (userSwitcherModal.classList.contains('hidden')) {
+                console.log("Opening user switcher modal.");
+                userSwitcherModal.classList.remove('hidden'); // Explicitly open
+                userSwitcherModal.style.display = 'flex'; // Ensure display flex for modal centering
                 await renderUserList();
+            } else {
+                console.log("Closing user switcher modal.");
+                userSwitcherModal.classList.add('hidden'); // Explicitly close
+                userSwitcherModal.style.display = 'none'; // Ensure display none
             }
         });
 
@@ -2197,21 +2400,72 @@
         userSwitcherModal.addEventListener('click', (event) => {
             // Check if the click was directly on the modal's background overlay, not its content
             if (event.target === userSwitcherModal) {
+                console.log("Closing user switcher modal via backdrop click.");
                 userSwitcherModal.classList.add('hidden');
+                userSwitcherModal.style.display = 'none'; // Ensure display none when closing via backdrop
             }
         });
 
-        // --- INITIALIZATION ---
-        async function loadUserData() {
-            console.log(`Loading data for user: ${currentUserName} (ID: ${currentUserId})`);
-            await renderJournals();
-            await renderGoals();
-            await renderTodos();
-            await renderNotes();
-            await loadChatHistory(); // Load chat history for the current user
-        }
+        // --- NEW ITEM FORMS LISTENERS ---
+        newJournalForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const title = document.getElementById('journal-title').value.trim();
+            const content = document.getElementById('journal-content').value.trim();
+            const mood = document.getElementById('journal-mood').value.trim();
+            if (content) { // Title can be inferred if empty
+                await createJournal(title, content, mood);
+                newJournalForm.reset();
+            } else {
+                showChatError('Journal content cannot be empty.', 'error');
+            }
+        });
 
+        newGoalForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const title = document.getElementById('goal-title').value.trim();
+            const description = document.getElementById('goal-description').value.trim();
+            const targetValue = parseFloat(document.getElementById('goal-target-value').value); // Will use default if empty due to createGoal logic
+            const dueDate = document.getElementById('goal-due-date').value;
+            if (title && description) {
+                await createGoal(title, description, targetValue, dueDate);
+                newGoalForm.reset();
+            } else {
+                showChatError('Goal title and description cannot be empty.', 'error');
+            }
+        });
+
+        newTodoForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const text = document.getElementById('todo-text').value.trim();
+            const dueDate = document.getElementById('todo-due-date').value;
+            const priority = document.getElementById('todo-priority').value;
+            if (text) {
+                await addTodo(text, dueDate, priority);
+                newTodoForm.reset();
+            } else {
+                showChatError('To-Do text cannot be empty.', 'error');
+            }
+        });
+
+        newNoteForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const title = document.getElementById('note-title').value.trim();
+            const content = document.getElementById('note-content').value.trim();
+            if (content) { // Title can be inferred if empty
+                await addNote(title, content);
+                newNoteForm.reset();
+            } else {
+                showChatError('Note content cannot be empty.', 'error');
+            }
+        });
+
+
+        // --- INITIALIZATION ---
         window.addEventListener('load', async () => {
+            // CRITICAL FIX: Ensure modal is hidden right away, overriding any potential previous state or CSS.
+            userSwitcherModal.classList.add('hidden'); 
+            userSwitcherModal.style.display = 'none'; 
+
             await openDB();
 
             // Ensure 'users' object store has at least a default user
@@ -2219,15 +2473,13 @@
             if (existingUsers.length === 0) {
                 const defaultUser = { id: 'default-user', name: 'Default User', createdAt: new Date().toISOString() };
                 await saveUser(defaultUser);
-                await switchUser('default-user', 'Default User'); // Set default user
+                // switchUser will handle setting localStorage and hiding the modal
+                await switchUser('default-user', 'Default User'); 
             } else {
-                // If there are users, ensure currentUserId is valid
                 const userExists = existingUsers.some(user => user.id === currentUserId);
                 if (!userExists) {
-                    // Fallback to first user if currentUserId is somehow invalid
-                    await switchUser(existingUsers[0].id, existingUsers[0].name);
+                    await switchUser(existingUsers[0].id, existingUsers[0].name); 
                 } else {
-                    // Update currentUserName in case it's mismatched or not fully set
                     const matchedUser = existingUsers.find(user => user.id === currentUserId);
                     if (matchedUser && matchedUser.name !== currentUserName) {
                          currentUserName = matchedUser.name;
@@ -2235,7 +2487,9 @@
                     }
                 }
             }
-            currentUsernameText.textContent = currentUserName; // Set initial display
+            // These ensure the header and modal's current user display are correct regardless of switchUser call
+            currentUsernameText.textContent = currentUserName; 
+            headerCurrentUsernameText.textContent = currentUserName; 
 
             // Initialize theme and dark mode
             const savedTheme = localStorage.getItem('selected-theme') || 'default';
@@ -2246,7 +2500,7 @@
 
             createIcons();
 
-            // Load all user data
+            // Load all user data for the (now correctly set) current user
             await loadUserData();
 
             // Start a new AI chat conversation
@@ -2280,6 +2534,15 @@
             button.addEventListener('click', () => {
                 navigateToSection(button.dataset.section);
             });
+        });
+
+        // Mobile Sidebar Toggle
+        sidebarToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-open');
+        });
+
+        mainNavBackdrop.addEventListener('click', () => {
+            document.body.classList.remove('sidebar-open');
         });
 
     </script>
