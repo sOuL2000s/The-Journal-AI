@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ai-journal-cache-v1';
+const CACHE_NAME = 'ai-journal-cache-v2';
 const urlsToCache = [
   './',
   'index.html',
